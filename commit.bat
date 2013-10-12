@@ -1,0 +1,1 @@
+xcopy "c:\wamp\www\IsometricTest" "C:\Users\Christoffer\Dev\C++\WSCServer\client" /s /Y
