@@ -218,4 +218,4 @@ pip-log.txt
 ## Custom
 #############
 
-WSCServer/MySql
+WSCServer/MySql/mysql_config.txt
