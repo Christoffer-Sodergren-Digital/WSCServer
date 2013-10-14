@@ -20,6 +20,7 @@ public:
 	virtual ~MySQLDB();
 
 	Connection *GetConnection(){return m_pxConnection;}
+	void Reconnect();
 
 protected:
 private:

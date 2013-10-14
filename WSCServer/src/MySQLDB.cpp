@@ -56,6 +56,11 @@ MySQLDB::~MySQLDB(){
 	delete m_pxConnection;
 }
 
+void MySQLDB::Reconnect(){
+	//m_pxDriver=get_driver_instance();
+	Open();
+}
+
 void MySQLDB::Open(){
 	try{
 		m_pxConnection=m_pxDriver->connect(m_sHost,m_sUser,m_sPswd);

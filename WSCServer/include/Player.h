@@ -20,6 +20,11 @@ class Player : public BaseEntity{
 
 		void Update();
 		void AttemptLogin(unsigned char *p_pucData);
+
+		//std::ostream & Serialize();
+
+		void Snapshot();
+		std::string & Name(){return m_sName;}
 	protected:
 	private:
 		Player();
@@ -28,6 +33,10 @@ class Player : public BaseEntity{
 
 		bool m_bShutdown;
 		bool m_bLoggedIn;
+
+		int m_iPlayerID;
+
+		std::string m_sName;
 
 		CagerInstance *m_pxInstance;
 		WSConnection *m_pxConnection;

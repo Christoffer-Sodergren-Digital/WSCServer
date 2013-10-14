@@ -35,7 +35,7 @@ void WSApplicationDataFrame::CleanFrame(){
 void WSApplicationDataFrame::MakeFrame(unsigned char* p_pcData, ApplicationFrameOpCode p_eOpCode){
     CleanFrame();
     int iLen=strlen((const char *)p_pcData);
-    if(iLen<2){return;}
+   /* if(iLen<2){return;}*/
     m_ucOpCode=p_eOpCode;
 
     m_uiDataSize=iLen;

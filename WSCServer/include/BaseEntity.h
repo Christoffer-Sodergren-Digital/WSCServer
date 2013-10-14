@@ -12,7 +12,7 @@ class BaseEntity
         BaseEntity();
         virtual ~BaseEntity();
 
-        friend std::ostream & Serialize(std::ostream & p_xOs, const BaseEntity & p_xEnt);
+       // friend std::ostream & Serialize(std::ostream & p_xOs, const BaseEntity & p_xEnt);
     protected:
     private:
         EntityDescription *m_pxEntityDescription;

@@ -14,7 +14,7 @@ CagerInstance::~CagerInstance()
 
 void CagerInstance::NewPlayer(Player *p_pxNewPlayer){
 	m_xPlayers.push_back(p_pxNewPlayer);
-	m_pxChat->Join(p_pxNewPlayer->Connection());
+	m_pxChat->Join(p_pxNewPlayer);
 }
 
 void CagerInstance::Update(){
@@ -24,7 +24,7 @@ void CagerInstance::Update(){
 		pxPlayer->Update();
 		if(pxPlayer->ShouldShutdown()){
 			it=m_xPlayers.erase(it);
-			m_pxChat->Leave(pxPlayer->Connection());
+			m_pxChat->Leave(pxPlayer);
 			delete pxPlayer;
 			if(it==m_xPlayers.end()){
 				break;
