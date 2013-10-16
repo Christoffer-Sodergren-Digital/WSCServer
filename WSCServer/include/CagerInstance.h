@@ -21,7 +21,7 @@ class CagerInstance
 		void NewPlayer(Player *p_pxNewPlayer);
 
 		CagerChat *Chat(){return m_pxChat;}
-		int Population()const{return m_xPlayers.size();}
+		int Population()const{return (int)m_xPlayers.size();}
     protected:
     private:
 

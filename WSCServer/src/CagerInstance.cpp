@@ -25,6 +25,7 @@ void CagerInstance::Update(){
 		if(pxPlayer->ShouldShutdown()){
 			it=m_xPlayers.erase(it);
 			m_pxChat->Leave(pxPlayer);
+			pxPlayer->PreDisconnect();
 			delete pxPlayer;
 			if(it==m_xPlayers.end()){
 				break;

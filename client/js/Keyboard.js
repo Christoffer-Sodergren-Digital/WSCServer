@@ -1,6 +1,13 @@
 var Keyboard=function(){
 	this.m_Key=[];
 	this.m_EventListeners=[];
+	var VK_DOWN=1;
+	var VK_LEFT=2;
+	var VK_UP=3;
+	var VK_RIGHT=4;
+	this.m_BufferFilter=[{k:40,vk:VK_DOWN},{k:37,vk:VK_LEFT},{k:38,vk:VK_UP},{k:39,vk:VK_RIGHT}];
+	this.m_KeyboardBuffer=[];
+	
 	
 	var xThis=this;
 	this.Pressed=function(p_Key){
@@ -18,7 +25,27 @@ var Keyboard=function(){
 				xThis.m_EventListeners[i].callback(event);
 			}
 		}
-		//return false;
+		var vk=0;
+		var tmp=xThis.m_BufferFilter;
+		var w=event.which;
+		var i,iC=tmp.length;
+		var preventDefault=false;
+		for(i=iC;i--;){
+			var o=tmp[i];
+			if(o.k==w){
+				vk=o.vk;
+				preventDefault=true;
+				break;
+			}
+		}
+		if(vk!=0){
+			xThis.m_KeyboardBuffer.push(vk);
+		}
+		if(event.which==8||preventDefault){ //prevent backspace navigation
+			event.preventDefault();
+			return false;
+		}
+		
 	}
 	document.onkeyup=function(event){
 		xThis.m_Key[event.which]=false;
@@ -28,7 +55,21 @@ var Keyboard=function(){
 				xThis.m_EventListeners[i].callback(event);
 			}
 		}
-		//return false;
+	}
+	document.onkeypress=function(event){
+		var i,iC=xThis.m_EventListeners.length;
+		for(i=0;i<iC;i++){
+			if(xThis.m_EventListeners[i].type=='keypress'){
+				xThis.m_EventListeners[i].callback(event);
+			}
+		}
+		
+	}
+	this.GetKeyboardBuffer=function(){
+		return xThis.m_KeyboardBuffer;
+	}
+	this.ClearBuffer=function(){
+		xThis.m_KeyboardBuffer=[];
 	}
 }
 

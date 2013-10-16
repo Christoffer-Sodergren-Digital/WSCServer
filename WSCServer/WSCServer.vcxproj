@@ -227,6 +227,7 @@
     <ClInclude Include="include\SnapshotFrame.h" />
     <ClInclude Include="include\StringHelper.h" />
     <ClInclude Include="include\TCPSocket.h" />
+    <ClInclude Include="include\Vec2.h" />
     <ClInclude Include="include\Vec3.h" />
     <ClInclude Include="include\WSConnection.h" />
     <ClInclude Include="include\WSFrame.h" />

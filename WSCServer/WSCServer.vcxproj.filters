@@ -200,5 +200,8 @@
     <ClInclude Include="include\HiResTimer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\Vec2.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

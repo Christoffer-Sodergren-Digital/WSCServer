@@ -1,58 +1,58 @@
 var l=function(a){console.log(a);}
 var player={x:450,y:250};
 var g_loggedin=false;
-var g_socket=new WebSocket("ws://mstrp2ez.no-ip.org:10444");
-g_socket.onopen=function(){l("Connected");}
-g_socket.onclose=function(){l("Disconnected");}
-g_socket.onmessage=function(msg){
-	if(g_loggedin===false){
-		HandleLogin(msg);
-		return;
-	}
-	
-}
-g_socket.onerror=function(msg){l(msg);}
 
-function HandleLogin(p_msg){
-	var reader=new FileReader();
-	reader.addEventListener("loadend", function(){
-		var view=new Uint8Array(reader.result);
-		var appOpCode=view[0];
-		var msg=view.subarray(1);
-		if(appOpCode!=0x02){}
-		
-		var textBlob=new Blob([msg]);
-		var fr=new FileReader();
-		fr.onload=function(e){
-			if(e.target.result=="ok"){
-				g_loggedin=true;
-				l("Logged in");
-				document.getElementById('login-box').style.display="none";
-				var canvas=document.getElementById('canvas');
-				canvas.style.display="block";
-				init();
-			}
-		}
-		fr.readAsText(textBlob);
-	});
-	reader.readAsArrayBuffer(p_msg.data);
+
+document.getElementById("register-link").onclick=function(p_event){
+	var x=document.getElementById("reg-form");
+	x.style.display="block";
+}
+
+document.addEventListener('NetLoggedIn',function(e){
+	document.getElementById('login-box').style.display='none';
+	document.getElementById('canvas').style.display='block';
+	init();
+},false);
+
+function drawBubble(ctx, message, x, y, w, h, radius){
+	var r = x + w;
+	var b = y + h;
+	ctx.beginPath();
+	ctx.strokeStyle="black";
+	ctx.lineWidth="2";
+	ctx.moveTo(x+radius, y);
+	ctx.lineTo(x+radius/2, y-10);
+	ctx.lineTo(x+radius * 2, y);
+	ctx.lineTo(r-radius, y);
+	ctx.quadraticCurveTo(r, y, r, y+radius);
+	ctx.lineTo(r, y+h-radius);
+	ctx.quadraticCurveTo(r, b, r-radius, b);
+	ctx.lineTo(x+radius, b);
+	ctx.quadraticCurveTo(x, b, x, b-radius);
+	ctx.lineTo(x, y+radius);
+	ctx.quadraticCurveTo(x, y, x+radius, y);
+	ctx.stroke();
+	ctx.fillStyle="white";
+	ctx.fill();
+	ctx.fillStyle="black";
+	ctx.font="12px Arial";
+	var line=Math.ceil((w+20)/10);
+	var offset=0;
+	var row=y+20;
+	while(offset<message.length){
+		var sub=message.substr(offset,line);
+		ctx.fillText(sub,x+20,row);
+		row+=14;
+		offset+=line;
+	}
 }
 
 var loginbtn=document.getElementById('login-btn');
 loginbtn.onclick=function(){
-	var s=g_socket;
 	var name=document.getElementById('login-name').value;
 	var pswd=document.getElementById('login-pswd').value;
 	var data=0x02+name+';'+pswd;
-	
-	var bb=new Blob([data],{type: 'text/plain'});
-	var fr=new FileReader();
-	fr.onload=function(e){
-		var buff=new Uint8Array(e.target.result);
-		buff[0]=buff[0]-48;
-		 try{ s.send(buff.buffer); } catch(ex){ log(ex); }
-	}
-	fr.readAsArrayBuffer(bb);
+	SkyNet.Send(data);
 }
 
 function init(){
@@ -60,13 +60,13 @@ function init(){
 	var tm=new TileManager(4000,4000,40);
 	var target=null;
 	var anim=new Animation();
-	anim.m_x=400;
-	anim.m_y=300;
 	var xThis=this;
 	var direction=Vec2d(0,0);
 	var speed=8;
 	var mousedown=false;
 	var mousepos=null;
+	var lastSnapshot=0;
+	var snapshots=[];
 	
 	tm.LoadTileAtlas('images/atlas.png',function(){
 		tm.LoadFromBitmap('images/map0.png',function(data){
@@ -89,6 +89,22 @@ function init(){
 				}
 			});
 			anim.Load('images/idleanim2.png',function(){
+				document.addEventListener('NetSnapshot', function(e){
+					snapshots.push(e.detail);
+					if(snapshots.length>3){
+						if(snapshots.length>500){
+							Chat.AddMessage("Snapshot buffer full, can't keep up.");
+							SkyNet.Disconnect();
+							snapshots.length=0;
+						}
+						var s1=snapshots[0];
+						anim.m_x=s1.x;
+						anim.m_y=s1.y; 
+						snapshots.splice(0,1);
+					}
+					
+				},false); 
+			
 				var tempAxis=new Vec2d(10,0);
 				tm.SortLayers();
 				var arr=[];
@@ -96,6 +112,15 @@ function init(){
 				tm.GetTilesInViewport(arr);
 				arr.sort(tm.SortFunc);
 				function render(p_Delta){
+					if(p_Delta-lastSnapshot>=100){
+						lastSnapshot=p_Delta;
+						var kb=Keyboard.GetKeyboardBuffer();
+						Keyboard.ClearBuffer();
+						var appdata=[4];
+						appdata=appdata.concat(kb);
+						SkyNet.Send(appdata);
+						
+					}
 					ctx.clearRect(0,0,tm.m_MapWidth,tm.m_MapHeight);
 					var i,iC=arr.length;
 					var bInB4=false;
@@ -108,7 +133,7 @@ function init(){
 					}
 					requestAnimationFrame(render);
 				}
-				render(0);
+				render(0); 
 			});
 		});
 	}); 

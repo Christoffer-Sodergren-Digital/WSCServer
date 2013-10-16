@@ -24,7 +24,7 @@ class WSFrame
         void MakeFrame(const unsigned char *p_pcApplicationData,WsOpcode p_eOpCode);
 
         bool IsValid(){return m_bValid;}
-        bool IsFin() const {return (bool)m_ucFin;};
+        bool IsFin() const {return (m_ucFin==1);};
         unsigned char OpCode()const{return m_ucOpcode;};
         unsigned int PayloadLen() const {return m_uiPayloadLen;};
         unsigned char *ApplicationData() {return m_pcApplicationData;}

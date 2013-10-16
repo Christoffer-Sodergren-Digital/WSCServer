@@ -2,7 +2,7 @@
 #define BASEENTITY_H
 
 #include <sstream>
-#include "Vec3.h"
+#include "Vec2.h"
 
 class EntityDescription;
 
@@ -14,8 +14,11 @@ class BaseEntity
 
        // friend std::ostream & Serialize(std::ostream & p_xOs, const BaseEntity & p_xEnt);
     protected:
+		Vec2 m_vPos;
+		EntityDescription *m_pxEntityDescription;
     private:
-        EntityDescription *m_pxEntityDescription;
+        
+		
 };
 
 #endif // BASEENTITY_H

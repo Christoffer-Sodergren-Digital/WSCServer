@@ -7,7 +7,8 @@ namespace WS{
 enum ApplicationFrameOpCode{
     APP_MSG=0x01,
 	APP_LOGIN=0x02,
-	APP_SNAPSHOT=0x03
+	APP_SNAPSHOT=0x03,
+	APP_INPUTBUFFER=0x04
 };
 
 class WSApplicationDataFrame

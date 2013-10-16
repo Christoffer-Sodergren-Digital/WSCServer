@@ -1,7 +1,8 @@
 #ifndef SNAPSHOT_FRAME_H
 #define SNAPSHOT_FRAME_H
 
-#include <ostream>
+#include <sstream>
+#include <vector>
 #include "ApplicationDataFrame.h"
 
 
@@ -10,11 +11,14 @@ public:
 	SnapshotFrame();
 	virtual ~SnapshotFrame();
 	
-	void Add(std::ostream & p_xOS);
+//	void Add(std::stringstream * p_xOS);
+	std::stringstream & Buffer(){return m_xBuffer;}
+	void MakeFrame();
 
 protected:
 private:
 	__int64 m_iTimestamp;
+	std::stringstream m_xBuffer;
 };
 
 

@@ -62,12 +62,10 @@ void MySQLDB::Reconnect(){
 }
 
 void MySQLDB::Open(){
+	if(m_pxConnection){delete m_pxConnection;}
 	try{
 		m_pxConnection=m_pxDriver->connect(m_sHost,m_sUser,m_sPswd);
-		m_pxConnection->setAutoCommit(0);
-
 		m_pxConnection->setSchema(m_sDB);
-
 	}catch(SQLException &e){
 		std::cerr<<e.what()<<std::endl;
 	}
