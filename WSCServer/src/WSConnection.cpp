@@ -39,14 +39,7 @@ WSFrame *WSConnection::ParseData(char *p_pData){
 void WSConnection::ParseContent(WS::WSFrame *p_pxFrame){
     unsigned char ucOC=p_pxFrame->OpCode();
     if(ucOC==TEXT_FRAME){
-      /*  std::cout<<"Recieved text frame: "<<p_pxFrame->ApplicationData()<<"\n";
-        CagerWorld *pxWorld=CagerWorld::Instance();
-
-        std::ostringstream xS;
-        IPAddr4 xAddr=GetRemoteAddr();
-        xS<<"("<<xAddr<<")"<<(const char*)p_pxFrame->ApplicationData();
-        std::string sMsg=xS.str();
-        pxWorld->BroadcastMsg(sMsg,this);*/
+     
     }else if(ucOC==BINARY_FRAME){
         try{
             ParseBinaryFrame((const char*)p_pxFrame->ApplicationData());
@@ -56,42 +49,10 @@ void WSConnection::ParseContent(WS::WSFrame *p_pxFrame){
     }
 }
 void WSConnection::ParseBinaryFrame(const char *p_pucFrameContent){
-//    1 byte (opcode)
-//    1 byte content len (0-125=0-125, 126=16bit, 127=64bit)
-//    len byte (content)
-
     const char *pucC=p_pucFrameContent;
     int iL=strlen(pucC);
     unsigned char ucOpcode=(pucC[0] & 0xFF);
     ResourceManager *pxRM=ResourceManager::Instance();
-    switch (ucOpcode){
-        case GET_RESOURCE:{
-                unsigned char ucResourceID=(pucC[1]&0xff);
-
-                std::string sResource=pxRM->GetResourceByKey((int)ucResourceID);
-                if(sResource!=RES_NOVAL){
-                    int iFrameSize=0;
-                    char *sContent=pxRM->ReadResourceFile(sResource);
-                    if(sContent==NULL){
-                        throw "Invalid file";
-                    }
-                   WSFrame *pxFrame=new WSFrame();
-                   pxFrame->MakeFrame((const unsigned char*)sContent,OP_BINARY);
-                    Send(pxFrame->Data(),pxFrame->FrameSize());
-                }
-            }
-            break;
-        case GET_RESOURCEBINDINGS:
-                int iFrameSize=0;
-                const std::string sMsg=pxRM->ResourceMapAsString();
-                //unsigned char *pFrame=CreateFrame(TEXT_FRAME,sMsg.c_str(),&iFrameSize);
-                WSFrame *pxFrame=new WSFrame();
-                pxFrame->MakeFrame((const unsigned char*)sMsg.c_str(),OP_BINARY);
-                Send(pxFrame->Data(),pxFrame->FrameSize());
-//                const char *sFrame=reinterpret_cast<const char*>(pFrame);
-//                send(m_iSocket,sFrame,iFrameSize,0);
-            break;
-    }
 
 
 }

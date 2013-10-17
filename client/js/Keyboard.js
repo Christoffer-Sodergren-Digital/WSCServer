@@ -6,7 +6,7 @@ var Keyboard=function(){
 	var VK_UP=3;
 	var VK_RIGHT=4;
 	this.m_BufferFilter=[{k:40,vk:VK_DOWN},{k:37,vk:VK_LEFT},{k:38,vk:VK_UP},{k:39,vk:VK_RIGHT}];
-	this.m_KeyboardBuffer=[];
+	this.m_KeyboardBuffer=[4];
 	
 	
 	var xThis=this;
@@ -17,7 +17,17 @@ var Keyboard=function(){
 	this.RegisterEventListener=function(p_Type,p_Callback){
 		xThis.m_EventListeners.push({type:p_Type,callback:p_Callback});
 	}
-	document.onkeydown=function(event){
+	this.UpdateKeyboardBuffer=function(){
+		var filter=xThis.m_BufferFilter;
+		var i,iC=filter.length;
+		for(i=iC;i--;){
+			if(xThis.m_Key[filter[i].k]){
+				xThis.m_KeyboardBuffer.push(filter[i].vk);
+			}
+		}
+	}
+	this.init=function(){
+		document.onkeydown=function(event){
 		xThis.m_Key[event.which]=true;
 		var i,iC=xThis.m_EventListeners.length;
 		for(i=0;i<iC;i++){
@@ -25,7 +35,7 @@ var Keyboard=function(){
 				xThis.m_EventListeners[i].callback(event);
 			}
 		}
-		var vk=0;
+		 var vk=0;
 		var tmp=xThis.m_BufferFilter;
 		var w=event.which;
 		var i,iC=tmp.length;
@@ -37,39 +47,42 @@ var Keyboard=function(){
 				preventDefault=true;
 				break;
 			}
-		}
-		if(vk!=0){
+		} 
+		/* if(vk!=0){
 			xThis.m_KeyboardBuffer.push(vk);
-		}
+		} */
 		if(event.which==8||preventDefault){ //prevent backspace navigation
 			event.preventDefault();
 			return false;
 		}
 		
-	}
-	document.onkeyup=function(event){
-		xThis.m_Key[event.which]=false;
-		var i,iC=xThis.m_EventListeners.length;
-		for(i=0;i<iC;i++){
-			if(xThis.m_EventListeners[i].type=='keyup'){
-				xThis.m_EventListeners[i].callback(event);
+		}
+		document.onkeyup=function(event){
+			xThis.m_Key[event.which]=false;
+			var i,iC=xThis.m_EventListeners.length;
+			for(i=0;i<iC;i++){
+				if(xThis.m_EventListeners[i].type=='keyup'){
+					xThis.m_EventListeners[i].callback(event);
+				}
 			}
 		}
-	}
-	document.onkeypress=function(event){
-		var i,iC=xThis.m_EventListeners.length;
-		for(i=0;i<iC;i++){
-			if(xThis.m_EventListeners[i].type=='keypress'){
-				xThis.m_EventListeners[i].callback(event);
+		document.onkeypress=function(event){
+			var i,iC=xThis.m_EventListeners.length;
+			for(i=0;i<iC;i++){
+				if(xThis.m_EventListeners[i].type=='keypress'){
+					xThis.m_EventListeners[i].callback(event);
+				}
 			}
+			
 		}
-		
 	}
+	
+	
 	this.GetKeyboardBuffer=function(){
 		return xThis.m_KeyboardBuffer;
 	}
 	this.ClearBuffer=function(){
-		xThis.m_KeyboardBuffer=[];
+		xThis.m_KeyboardBuffer=[4];
 	}
 }
 

@@ -13,7 +13,7 @@ class ChatFrame : public WSApplicationDataFrame
         virtual ~ChatFrame();
 
         virtual void ParseFrame(unsigned char *p_pcData);
-		virtual void MakeFrame(unsigned char *p_pcData, ApplicationFrameOpCode p_eOpCode);
+		virtual void MakeFrame(unsigned char *p_pcData,int p_iSize, ApplicationFrameOpCode p_eOpCode);
 
 		void Whisper(bool p_bWhisper){m_bWhisper=p_bWhisper;}
 		bool Whisper(){return m_bWhisper;}

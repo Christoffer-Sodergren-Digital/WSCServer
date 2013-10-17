@@ -17,11 +17,11 @@ class WSFrame
     public:
         WSFrame();
         WSFrame(char *p_pcData);
-		WSFrame(const unsigned char *p_pcData, WsOpcode p_eOpCode);
+		WSFrame(const unsigned char *p_pcData,int p_iSize, WsOpcode p_eOpCode);
         virtual ~WSFrame();
 
         void ParseFrame(char *p_pcData);
-        void MakeFrame(const unsigned char *p_pcApplicationData,WsOpcode p_eOpCode);
+        void MakeFrame(const unsigned char *p_pcApplicationData,int p_iSize,WsOpcode p_eOpCode);
 
         bool IsValid(){return m_bValid;}
         bool IsFin() const {return (m_ucFin==1);};

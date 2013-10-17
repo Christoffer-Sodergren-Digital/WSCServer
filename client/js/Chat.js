@@ -31,6 +31,7 @@ var Chat=function(){
 			}
 		}else{
 			if(xThis.m_ChatVisible){
+				if(w==8){return;} //firefox fix
 				var c=String.fromCharCode(w);
 				if(p_event.shiftKey===false){
 					c=c.toLowerCase(c);
@@ -43,7 +44,7 @@ var Chat=function(){
 		var w=p_event.which;
 		if(w==8){ //backspace
 			if(xThis.m_CurrentString.length>1){
-				xThis.m_CurrentString=xThis.m_CurrentString.substr(0,xThis.m_CurrentString.length-1);
+				xThis.m_CurrentString=xThis.m_CurrentString.substring(0,xThis.m_CurrentString.length-1);
 			}
 			return;
 		}

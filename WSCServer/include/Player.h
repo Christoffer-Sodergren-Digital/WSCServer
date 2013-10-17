@@ -27,32 +27,30 @@ class Player : public BaseEntity{
 
 		WSConnection *Connection() const {return m_pxConnection;}
 
-		bool ShouldShutdown()const{return m_bShutdown;}
+		inline bool ShouldShutdown()const{if(!m_pxConnection){return true;}return m_pxConnection->Shutdown();}
+		inline bool IsLoggedIn()const{return m_bLoggedIn;}
+		inline bool NeedFullSnapshot()const{return m_bNeedFullSnapshot;}
+		inline void SetFullSnapshot(bool p_bS){m_bNeedFullSnapshot=p_bS;}
 
 		void Update();
 		void AttemptLogin(unsigned char *p_pucData);
 
-		friend std::stringstream & operator<<(std::stringstream & p_xSS,Player & p_xP);
-
-		void Snapshot();
+		friend std::ostream & operator<<(std::ostream & p_xSS,Player & p_xP);
 		std::string & Name(){return m_sName;}
 
-		void PreDisconnect();
+		virtual void PreDisconnect();
 	protected:
 	private:
 		Player();
-		//WSApplicationDataFrame *ConstructFrame(unsigned char p_ucOpCode);
-		void HandleFrame(unsigned char *p_pucData);
-		void ParseInputBuffer(unsigned char *p_pucData);
-		void UpdateDB();
+		void HandleFrame(unsigned char *p_pucData,int p_iSize);
+		void ParseInputBuffer(unsigned char *p_pucData, int p_iLen);
 
-		bool m_bShutdown;
 		bool m_bLoggedIn;
+		bool m_bNeedFullSnapshot;
 
 		int m_iPlayerID;
 
 		clock_t m_iLastUpdate;
-
 
 		std::string m_sName;
 

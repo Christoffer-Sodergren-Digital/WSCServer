@@ -28,6 +28,7 @@ class WSConnection : public TCPSocket
         virtual ~WSConnection();
 
         inline bool Shutdown() const {return m_bShutdown;}
+		inline void SetShutdown(){m_bShutdown=true;}
 		WSFrame *ParseData(char *p_pData);
         WSFrame *ReceiveFrame();
     protected:
@@ -36,16 +37,22 @@ class WSConnection : public TCPSocket
         void GenerateHandshake(const std::string & p_sData);
         void SendHTTPHandshakeResponse(const std::string & p_sKey);
         void ParseContent(WS::WSFrame *p_pxFrame);
+		void ParseBinaryFrame(const char *p_pucFrameContent);
+
         unsigned char *ParseFrame(char *p_pData,unsigned char *p_iOpCode);
-        void ParseBinaryFrame(const char *p_pucFrameContent);
-        unsigned char *CreateFrame(WebSocketFrameType p_eFrameType,const char *p_sMsg, int *p_iFrameSize);
-        std::string Base64It(std::string p_sKey);
+		unsigned char *CreateFrame(WebSocketFrameType p_eFrameType,const char *p_sMsg, int *p_iFrameSize);
+        
         SOCKET m_iSocket;
+
+		std::string Base64It(std::string p_sKey);
         std::string m_sHost;
         std::string m_sMagicNumber;
+
         int m_iVersion;
+
         bool m_bReady;
         bool m_bShutdown;
+
         time_t m_xLastTime;
 };
 

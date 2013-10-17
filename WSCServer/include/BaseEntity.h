@@ -12,13 +12,21 @@ class BaseEntity
         BaseEntity();
         virtual ~BaseEntity();
 
-       // friend std::ostream & Serialize(std::ostream & p_xOs, const BaseEntity & p_xEnt);
+		friend std::ostream & operator<<(std::ostream & p_xSS, BaseEntity & p_xEnt);
+		bool NetChanged()const{return m_bNetChanged;}
+		void NetClear(){m_bNetChanged=false;}
+
+		virtual void PreDisconnect(){}
     protected:
 		Vec2 m_vPos;
-		EntityDescription *m_pxEntityDescription;
+		static int m_iIDIncrementer;
+		int m_iEntityID;
+		bool m_bNetChanged;
+		unsigned char m_ucEntityType;
     private:
-        
 		
 };
+
+
 
 #endif // BASEENTITY_H

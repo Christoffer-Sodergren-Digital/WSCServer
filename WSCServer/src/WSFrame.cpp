@@ -30,7 +30,7 @@ WSFrame::WSFrame(char *p_pcData)
     ParseFrame(p_pcData);
 
 }
-WSFrame::WSFrame(const unsigned char *p_pcData, WsOpcode p_eOpCode){
+WSFrame::WSFrame(const unsigned char *p_pcData,int p_iSize, WsOpcode p_eOpCode){
 	m_bValid=false;
     m_ucFin=0;
     m_ucMask=0;
@@ -39,7 +39,7 @@ WSFrame::WSFrame(const unsigned char *p_pcData, WsOpcode p_eOpCode){
     m_pcApplicationData=0;
     m_puiMask=0;
     m_uiFrameSize=0;
-	MakeFrame(p_pcData,p_eOpCode);
+	MakeFrame(p_pcData,p_iSize,p_eOpCode);
 }
 
 WSFrame::~WSFrame(){
@@ -108,9 +108,9 @@ void WSFrame::ParseFrame(char *p_pcData){
     memcpy(m_pcData,p_pcData,iInLen);
 }
 
-void WSFrame::MakeFrame(const unsigned char *p_pucApplicationData, WsOpcode p_eOpcode){
+void WSFrame::MakeFrame(const unsigned char *p_pucApplicationData, int p_iSize, WsOpcode p_eOpcode){
     int iPos=0;
-    int iSize=strlen((const char*)p_pucApplicationData);//.length();
+    int iSize=p_iSize;//.length();
     int iBuffSize=0;
     int iOffset=0;
     unsigned char *pBuffer;

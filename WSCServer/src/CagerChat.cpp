@@ -63,9 +63,9 @@ void CagerChat::Broadcast(std::string & p_sMsg, Player *p_pxOrigin, bool p_bEcho
 	std::string sMsg=p_pxOrigin->Name()+": ";
 	sMsg+=p_sMsg;
 	ChatFrame *pxFrame=new ChatFrame();
-	pxFrame->MakeFrame((unsigned char*)sMsg.c_str(),APP_MSG);
+	pxFrame->MakeFrame((unsigned char*)sMsg.c_str(),sMsg.length(),APP_MSG);
 	WSFrame *pxOut=new WSFrame();
-	pxOut->MakeFrame(pxFrame->Frame(),WS::OP_BINARY);
+	pxOut->MakeFrame(pxFrame->Frame(),pxFrame->FrameSize(),WS::OP_BINARY);
 	
 	std::list<WSConnection*>::iterator it;
 	for(it=m_xParticipants.begin();it!=m_xParticipants.end();++it){

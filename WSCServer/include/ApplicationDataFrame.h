@@ -8,20 +8,21 @@ enum ApplicationFrameOpCode{
     APP_MSG=0x01,
 	APP_LOGIN=0x02,
 	APP_SNAPSHOT=0x03,
-	APP_INPUTBUFFER=0x04
+	APP_INPUTBUFFER=0x04,
+	APP_PLAYER_DISCONNECT=0x05
 };
 
 class WSApplicationDataFrame
 {
     public:
         WSApplicationDataFrame();
-        WSApplicationDataFrame(unsigned char *p_pcData, ApplicationFrameOpCode p_eOpCode);
+        WSApplicationDataFrame(unsigned char *p_pcData, int p_iLen, ApplicationFrameOpCode p_eOpCode);
         virtual ~WSApplicationDataFrame();
 
-        virtual void MakeFrame(unsigned char *p_pcData, ApplicationFrameOpCode p_eOpCode);
+        virtual void MakeFrame(unsigned char *p_pcData, int p_iLen, ApplicationFrameOpCode p_eOpCode);
         void Finalize();
 
-        virtual void ParseFrame(unsigned char *p_pcData);
+        virtual void ParseFrame(unsigned char *p_pcData, int p_iLen);
 
         unsigned char OpCode()const{return m_ucOpCode;};
 

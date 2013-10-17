@@ -2,6 +2,7 @@
 #define CAGERINSTANCE_H
 
 #include <list>
+#include <ctime>
 
 class CagerChat;
 class Player;
@@ -22,9 +23,14 @@ class CagerInstance
 
 		CagerChat *Chat(){return m_pxChat;}
 		int Population()const{return (int)m_xPlayers.size();}
+
+		void Snapshot();
+		void Snapshot(Player *pxPlayer,bool p_bFull=true);
     protected:
     private:
 
+	clock_t m_iLastUpdate;
+	clock_t m_iLastSnapshot;
 	CagerChat *m_pxChat;
     std::list<Player*> m_xPlayers;
 

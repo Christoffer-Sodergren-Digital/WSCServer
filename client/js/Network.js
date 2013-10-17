@@ -6,13 +6,13 @@ var SkyNet=function(p_Host){
 	
 	var xThis=this;
 	s.onopen=function(e){
-		var event=new CustomEvent('NetConnect',{'details':e});
-		document.dispatchEvent(event);
+		var evnt=CreateCustomEvent('NetConnect',e);
+		document.dispatchEvent(evnt);
 		Chat.AddMessage("Connected");
 	}
 	s.onclose=function(e){
-		var event=new CustomEvent('NetDisconnect',{'details':e});
-		document.dispatchEvent(event);
+		var evnt=CreateCustomEvent('NetDisconnect',e);
+		document.dispatchEvent(evnt);
 		Chat.AddMessage("Disconnected");
 	}
 	s.onmessage=function(p_msg){
@@ -21,49 +21,26 @@ var SkyNet=function(p_Host){
 		reader.addEventListener("loadend", function(){
 			var view=new Uint8Array(reader.result);
 			var appOpCode=view[0];
-			var msg=view.subarray(1);
+			var data=view.subarray(1);
 			if(xThis.m_Loggedin===false){
 				if(appOpCode!=0x02){return;}
-				xThis.HandleLogin(msg);
+				xThis.HandleLogin(data);
 				return;
 			}
 			if(appOpCode==0x01){
 				var context=document.getElementById('canvas').getContext('2d');
-				var textBlob=new Blob([msg]);
+				var textBlob=new Blob([data]);
 				var fr=new FileReader();
 				fr.onload=function(e){
 					var message=e.target.result;
-					document.dispatchEvent(new CustomEvent('NetMessage',{'detail':message}));
+					document.dispatchEvent(CreateCustomEvent('NetMessage',message));
 				}
 				fr.readAsText(textBlob);
 			}
 			if(appOpCode==0x03){ //snapshot
-				var posx=0;
-				var posy=0;
-				if(view.length==3){
-					posx=view[1];
-					posx=view[2];
-				}else if(view.length==4){ //TODO pack this better on the server side
-					var low=view[1];
-					var high=view[2];
-					posx=high<<4|(low&0xff);
-					posy=view[3];
-				}else if(view.length==5){
-					var low=view[2];
-					var high=view[1];
-					posx=high<<4|(low&0xff);
-					low=view[4];
-					high=view[3];
-					posy=high<<4|(low&0xff);
-				}
-				
-				var obj={x:posx,y:posy};
-				document.dispatchEvent(new CustomEvent('NetSnapshot',{'detail':obj}));
+				var obj={d:data};
+				document.dispatchEvent(CreateCustomEvent('NetSnapshot',obj));
 			}
-			/* if(appOpCode==0x04){
-				console.log(view);
-			} */
-			
 		});
 		reader.readAsArrayBuffer(p_msg.data);
 	}
@@ -74,17 +51,20 @@ var SkyNet=function(p_Host){
 			if(e.target.result=="ok"){
 				xThis.m_Loggedin=true;
 				Chat.AddMessage("Logged in");
-				document.dispatchEvent(new CustomEvent('NetLoggedIn',{}));
+				document.dispatchEvent(CreateCustomEvent('NetLoggedIn',{}));
 			}
 		}
 		fr.readAsText(textBlob);
 	}
 	this.Send=function(p_data){
+		if( Object.prototype.toString.call( p_data ) === '[object Array]' ) {
+			p_data=p_data.join('');
+		}
 		var bb=new Blob([p_data],{type: 'text/plain'});
 		var fr=new FileReader();
 		fr.onload=function(e){
 			var buff=new Uint8Array(e.target.result);
-			buff[0]=buff[0]-48;
+			buff[0]=buff[0]-48; //number hack TODO: fix this so that it is always the right value
 			if(buff.length<=1){return;}
 			 try{ s.send(buff.buffer); } catch(ex){ console.log(ex); }
 		}

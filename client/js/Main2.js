@@ -1,7 +1,4 @@
-var l=function(a){console.log(a);}
-var player={x:450,y:250};
 var g_loggedin=false;
-
 
 document.getElementById("register-link").onclick=function(p_event){
 	var x=document.getElementById("reg-form");
@@ -11,7 +8,10 @@ document.getElementById("register-link").onclick=function(p_event){
 document.addEventListener('NetLoggedIn',function(e){
 	document.getElementById('login-box').style.display='none';
 	document.getElementById('canvas').style.display='block';
+	/* document.getElementById('background').style.display='block';
+	document.getElementById('foreground').style.display='block'; */
 	init();
+	Keyboard.init();
 },false);
 
 function drawBubble(ctx, message, x, y, w, h, radius){
@@ -57,6 +57,7 @@ loginbtn.onclick=function(){
 
 function init(){
 	var canvas = document.getElementById("canvas");
+	/* var backbuffer=document.getElementById("backbuffer"); */
 	var tm=new TileManager(4000,4000,40);
 	var target=null;
 	var anim=new Animation();
@@ -67,6 +68,7 @@ function init(){
 	var mousepos=null;
 	var lastSnapshot=0;
 	var snapshots=[];
+	var lastupdate=1;
 	
 	tm.LoadTileAtlas('images/atlas.png',function(){
 		tm.LoadFromBitmap('images/map0.png',function(data){
@@ -89,51 +91,53 @@ function init(){
 				}
 			});
 			anim.Load('images/idleanim2.png',function(){
-				document.addEventListener('NetSnapshot', function(e){
-					snapshots.push(e.detail);
-					if(snapshots.length>3){
-						if(snapshots.length>500){
-							Chat.AddMessage("Snapshot buffer full, can't keep up.");
-							SkyNet.Disconnect();
-							snapshots.length=0;
-						}
-						var s1=snapshots[0];
-						anim.m_x=s1.x;
-						anim.m_y=s1.y; 
-						snapshots.splice(0,1);
-					}
-					
-				},false); 
-			
+				var context=ctx;
+				/* var bb=backbuffer.getContext('2d'); */
 				var tempAxis=new Vec2d(10,0);
 				tm.SortLayers();
 				var arr=[];
 				arr.length=0;
 				tm.GetTilesInViewport(arr);
 				arr.sort(tm.SortFunc);
-				function render(p_Delta){
+				var bg=tm.GetTilesInViewPortOnLayer(0);
+				var fg=tm.GetTilesInViewPortOnLayer(2);
+				function update(p_Delta){
 					if(p_Delta-lastSnapshot>=100){
 						lastSnapshot=p_Delta;
 						var kb=Keyboard.GetKeyboardBuffer();
 						Keyboard.ClearBuffer();
-						var appdata=[4];
-						appdata=appdata.concat(kb);
-						SkyNet.Send(appdata);
-						
-					}
-					ctx.clearRect(0,0,tm.m_MapWidth,tm.m_MapHeight);
-					var i,iC=arr.length;
-					var bInB4=false;
-					for(i=0;i<iC;i++){
-						if(!bInB4&&arr[i].m_Layer==2){
-							bInB4=true;
-							anim.Animate(p_Delta);
+						if(kb.length>1){
+							SkyNet.Send(kb);
 						}
-						arr[i].draw();
 					}
-					requestAnimationFrame(render);
+					
+					var dt=p_Delta-lastupdate; //used for lerping
+					lastupdate=p_Delta;
+					
+					EntityMngr.Update(dt);
+					Keyboard.UpdateKeyboardBuffer();
+					
+					context.clearRect(0,0,canvas.width,canvas.height);
+					var i,iC=bg.length;
+					for(i=0;i<iC;i++){
+						bg[i].Draw(context);
+					}
+					var xEnts=EntityMngr.GetEntities();
+					for(var obj in xEnts){ //can't use regular for because of index disparity
+						var o=xEnts[obj];
+						if(!o||o.Render===undefined){continue;}
+						o.Render(context);
+					}
+					iC=fg.length;
+					for(i=0;i<iC;i++){
+						fg[i].Draw(context);
+					}
+					
+					
+					//context.drawImage(backbuffer,0,0);
+					requestAnimationFrame(update);
 				}
-				render(0); 
+				update(0); 
 			});
 		});
 	}); 

@@ -9,6 +9,7 @@
 #include "FrameManager.h"
 #include "CagerChat.h"
 #include "MySQLDB.h"
+#include "EntityID.h"
 
 
 using namespace WS;
@@ -16,21 +17,23 @@ using namespace WS;
 Player::Player(WSConnection *p_pxConnection,CagerInstance *p_pxInstance){
 	m_pxConnection=p_pxConnection;
 	m_pxInstance=p_pxInstance;
-	m_bShutdown=false;
 	m_bLoggedIn=false;
 	m_sName="NoName";
 	m_iPlayerID=0;
-	m_iLastUpdate=clock();;
+	m_iLastUpdate=clock();
+	m_bNeedFullSnapshot=true;
+	m_ucEntityType=ENT_PLAYER;
 }
 
 Player::Player(){
 	m_pxInstance=NULL;
 	m_pxConnection=NULL;
 	m_bLoggedIn=false;
-	m_bShutdown=false;
 	m_sName="NoName";
 	m_iPlayerID=0;
-	m_iLastUpdate=clock();;
+	m_iLastUpdate=clock();
+	m_bNeedFullSnapshot=true;
+	m_ucEntityType=ENT_PLAYER;
 }
 
 Player::~Player(){
@@ -48,7 +51,11 @@ void Player::Update(){
 			WSFrame *pxFrame=pxCon->ReceiveFrame();
 			//WSApplicationDataFrame *pxAppFrame=new WSApplicationDataFrame(pxFrame->ApplicationData(),pxFrame->OpCode());
 			if(pxFrame){
-				HandleFrame(pxFrame->ApplicationData());
+				if(pxFrame->OpCode()==WS::OP_CLOSE){
+					m_pxConnection->SetShutdown();
+				}else{
+					HandleFrame(pxFrame->ApplicationData(),pxFrame->PayloadLen());
+				}
 				delete pxFrame;
 			}
 		}
@@ -56,64 +63,36 @@ void Player::Update(){
     if(pxCon->HasHalfClose()){
         std::cout<<"Connection closed: ";
         pxCon->GetRemoteAddr().Dump();
-        pxCon->Close();
-		m_bShutdown=true;
+		m_pxConnection->SetShutdown();
     }
-	if(m_bLoggedIn){
-		clock_t iT=clock();
-		clock_t diff=iT-m_iLastUpdate;
-		if(diff>=((float)16/CLOCKS_PER_SEC)){
-			Snapshot();
-			m_iLastUpdate=iT;
-		}
-		
-	}
 }
 
-void Player::UpdateDB(){
-	MySQLDB *pxDB=MySQLDB::Instance();
-	pxDB->Reconnect();
-	sql::Connection *pxCon=pxDB->GetConnection();
-
-	
-
-	/*try{
-		m_pxUpdateStatement->setDouble(1,m_vPos.m_fX);
-		m_pxUpdateStatement->setDouble(2,m_vPos.m_fX);
-		m_pxUpdateStatement->setInt(3,m_iPlayerID);
-		int res=m_pxUpdateStatement->executeUpdate();
-	}catch(SQLException & e){
-		std::cerr<<e.what()<<std::endl;
-		return;
-	}*/
-}
-
-void Player::HandleFrame(unsigned char *p_pucData){
-	int iLen=(int)strlen((const char*)p_pucData);
+void Player::HandleFrame(unsigned char *p_pucData,int p_iSize){
+	int iLen=p_iSize;
 	if(iLen<2){return;}
 	unsigned char ucOpCode=p_pucData[0];
 
 	if(!m_bLoggedIn&&ucOpCode!=WS::APP_LOGIN){
-		m_bShutdown=true;
+		m_pxConnection->SetShutdown();
 		return;
 	}
 
 	//TODO: Fix this to create seperate message handlers instead
 	if(ucOpCode==WS::APP_MSG){
 		ChatFrame *pxFrame=new ChatFrame();
-		pxFrame->MakeFrame(p_pucData,WS::APP_MSG);
+		pxFrame->MakeFrame(p_pucData,iLen,WS::APP_MSG);
 		m_pxInstance->Chat()->ParseChatFrame(pxFrame,this);
+		delete pxFrame;
 	}else if(ucOpCode==WS::APP_LOGIN){
 		AttemptLogin(p_pucData);
-	}else if(ucOpCode==WS::APP_SNAPSHOT){
-		Snapshot();
 	}else if(ucOpCode==WS::APP_INPUTBUFFER){
-		ParseInputBuffer(p_pucData);
+		ParseInputBuffer(p_pucData,iLen);
 	}
 }
-void Player::ParseInputBuffer(unsigned char *p_pucData){
+void Player::ParseInputBuffer(unsigned char *p_pucData,int p_iLen){
 	if(p_pucData==NULL){return;}
-	size_t iLen=strlen((char*)p_pucData);
+	size_t iLen=p_iLen;
+	bool bC=true;
 	int i,iC=(int)iLen;
 	for(i=1;i<iC;i++){
 		unsigned char ucK=p_pucData[i]-48;
@@ -125,42 +104,23 @@ void Player::ParseInputBuffer(unsigned char *p_pucData){
 			m_vPos.m_fY-=2;
 		}else if(ucK==RIGHT){
 			m_vPos.m_fX+=2;
+		}else{
+			bC=false;
 		}
 	}
-}
-void Player::Snapshot(){
-	int iPosX=(int)m_vPos.m_fX;
-	int iPosY=(int)m_vPos.m_fY;
-
-	unsigned char *sBuff=new unsigned char[5];
-
-	sBuff[0]=(iPosX>>4);
-	sBuff[1]=(iPosX&0xff);
-	sBuff[2]=(iPosY>>4);
-	sBuff[3]=(iPosY&0xff);
-	
-	sBuff[4]=0;
-
-	WS::WSApplicationDataFrame *pxAppFrame=new WS::WSApplicationDataFrame(sBuff,WS::APP_SNAPSHOT);
-	WS::WSFrame *pxWSFrame=new WS::WSFrame(pxAppFrame->Frame(),WS::OP_BINARY);
-	m_pxConnection->Send(pxWSFrame->Data(),pxWSFrame->FrameSize());
-	
-	delete pxAppFrame;
-	delete pxWSFrame;
-	delete sBuff;
-	
+	m_bNetChanged=bC;
 }
 
 void Player::AttemptLogin(unsigned char *p_pucData){
+	if(!m_pxConnection){return;}
 	MySQLDB *pxDB=MySQLDB::Instance();
 	pxDB->Reconnect();
 	sql::Connection *pxCon=pxDB->GetConnection();
 
-	
 	std::string sData=(char*)p_pucData;
 	std::vector<std::string> xTokens;
 	boost::split(xTokens, sData.substr(1), boost::is_any_of(";"));
-	if(xTokens.size()<2){m_bShutdown=true;return;}
+	if(xTokens.size()<2){m_pxConnection->SetShutdown();return;}
 
 	md5wrapper xMD5;
 	std::string sHash=xMD5.getHashFromString(xTokens[1]);
@@ -170,7 +130,7 @@ void Player::AttemptLogin(unsigned char *p_pucData){
 		pxPS=pxCon->prepareStatement("SELECT u.id, c.name FROM ca_user AS u LEFT JOIN ca_character AS c ON c.id = u.id WHERE u.email=? AND u.password=? LIMIT 0 , 30");
 		pxPS->setString(1,sName);
 		pxPS->setString(2,sHash);
-		if(!pxPS->execute()){m_bShutdown=true;return;}
+		if(!pxPS->execute()){m_pxConnection->SetShutdown();return;}
 	}
 	catch (SQLException &e){
 		std::cerr<<e.what()<<std::endl;
@@ -179,18 +139,19 @@ void Player::AttemptLogin(unsigned char *p_pucData){
 	sql::ResultSet *pxRS=pxPS->getResultSet();
 	int iCount=(int)pxRS->rowsCount();
 
-	if(iCount<=0){m_bShutdown=true;return;}
-	if(iCount>1){std::cerr<<"DATABASE: More than one matching user account for login\n";m_bShutdown=true;return;}
+	if(iCount<=0){m_pxConnection->SetShutdown();return;}
+	if(iCount>1){
+		std::cerr<<"DATABASE: More than one matching user account for login\n";
+		m_pxConnection->SetShutdown();
+		return;
+	}
 
 	if(pxRS->next()){
 		m_sName=pxRS->getString("name");
+		m_iPlayerID=pxRS->getInt("id");
 	}
 
 	m_bLoggedIn=true;
-
-	if(pxRS->next()){
-		m_iPlayerID=pxRS->getInt("id");
-	}
 	
 	delete pxPS;
 	delete pxRS;
@@ -208,8 +169,9 @@ void Player::AttemptLogin(unsigned char *p_pucData){
 
 	delete pxST;
 
-	WS::WSApplicationDataFrame *pxAppFrame=new WS::WSApplicationDataFrame((unsigned char*)"ok",WS::APP_LOGIN);
-	WS::WSFrame *pxWSFrame=new WS::WSFrame(pxAppFrame->Frame(),WS::OP_BINARY);
+	WS::WSApplicationDataFrame *pxAppFrame=new WS::WSApplicationDataFrame((unsigned char*)"ok",2,WS::APP_LOGIN);
+	//pxAppFrame->Finalize();
+	WS::WSFrame *pxWSFrame=new WS::WSFrame(pxAppFrame->Frame(),pxAppFrame->FrameSize(),WS::OP_BINARY);
 	m_pxConnection->Send(pxWSFrame->Data(),pxWSFrame->FrameSize());
 
 	delete pxAppFrame;
@@ -217,6 +179,12 @@ void Player::AttemptLogin(unsigned char *p_pucData){
 }
 
 void Player::PreDisconnect(){
+	if(!m_pxConnection){return;}
+
+	std::cout<<"Connection closed: ";
+	m_pxConnection->GetRemoteAddr().Dump();
+	m_pxConnection->Close();
+
 	MySQLDB *pxDB=MySQLDB::Instance();
 	pxDB->Reconnect();
 	sql::Connection *pxCon=pxDB->GetConnection();
@@ -225,7 +193,7 @@ void Player::PreDisconnect(){
 	try{
 		pxPS=pxCon->prepareStatement("SELECT SQL_NO_CACHE guest FROM ca_user WHERE id=?");
 		pxPS->setInt(1,m_iPlayerID);
-		if(!pxPS->execute()){m_bShutdown=true;return;}
+		if(!pxPS->execute()){m_pxConnection->SetShutdown();return;}
 	}
 	catch (SQLException &e){
 		std::cerr<<e.what()<<std::endl;
@@ -249,7 +217,11 @@ void Player::PreDisconnect(){
 		try{
 			pxPS=pxCon->prepareStatement("DELETE FROM ca_user WHHERE id=?");
 			pxPS->setInt(1,m_iPlayerID);
-			if(!pxPS->execute()){m_bShutdown=true;std::cerr<<"Could not delete guest account with id: "<<m_iPlayerID<<std::endl;return;}
+			if(!pxPS->execute()){
+				m_pxConnection->SetShutdown();
+				std::cerr<<"Could not delete guest account with id: "<<m_iPlayerID<<std::endl;
+				return;
+			}
 		}catch (SQLException &e){
 			std::cerr<<e.what()<<std::endl;
 		}
@@ -259,7 +231,10 @@ void Player::PreDisconnect(){
 }
 
 
-std::stringstream & operator<<(std::stringstream & p_xSS, Player & p_xP){
-	p_xSS<<p_xP.m_iPlayerID<<p_xP.m_vPos.m_fX<<p_xP.m_vPos.m_fY;
+std::ostream & operator<<(std::ostream & p_xSS, Player & p_xP){
+	p_xSS<<p_xP.m_ucEntityType;
+	BaseEntity & xBase(p_xP);
+	p_xSS<<xBase;
+	p_xSS<<p_xP.m_vPos;
 	return p_xSS;
 }

@@ -203,6 +203,7 @@
     <ClInclude Include="include\CagerInstance.h" />
     <ClInclude Include="include\CagerWorld.h" />
     <ClInclude Include="include\ChatFrame.h" />
+    <ClInclude Include="include\EntityID.h" />
     <ClInclude Include="include\FrameManager.h" />
     <ClInclude Include="include\hashlibpp.h" />
     <ClInclude Include="include\HiResTimer.h" />

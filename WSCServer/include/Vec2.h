@@ -4,6 +4,12 @@
 #include <sstream>
 
 class Vec2{
+protected:
+	int frac_to_int(double p_dNum,int p_iNumDec){
+		double dDummy,dFrac;
+		dFrac=modf(p_dNum,&dDummy);
+		return (int)floor(dFrac*pow(10,p_iNumDec));
+	}
 public:
 	Vec2(){m_fX=m_fY=0;}
 	Vec2(float p_fX,float p_fY):m_fX(p_fX),m_fY(p_fY){}
@@ -53,12 +59,41 @@ public:
 	float m_fX;
 	float m_fY;
 
-	//friend std::stringstream & operator<<(std::stringstream & p_xSS,Vec2 & p_vV){
-	//	p_xSS<<p_vV.m_fX<<p_vV.m_fY;
-	//	return p_xSS;
-	//}
-};
+	friend std::ostream & operator<<(std::ostream & p_xSS,Vec2 & p_vV){
+		int iIntegral=(int)p_vV.m_fX;
+		int iFrac=p_vV.frac_to_int(p_vV.m_fX,3);
+		unsigned char ucHigh=0;
+		if(iIntegral>255){
+			ucHigh=((iIntegral>>4)&0xff);
+		}
+		unsigned char ucLow=(iIntegral&0xff);
 
+		unsigned char ucHighFrac=0;
+		if(iFrac>255){
+			ucHighFrac=((iFrac>>4)&0xff);
+		}
+		unsigned char ucLowFrac=(iFrac&0xff);
+		p_xSS<<ucHigh<<ucLow<<ucHighFrac<<ucLowFrac;
+
+		iIntegral=(int)p_vV.m_fY;
+		iFrac=p_vV.frac_to_int(p_vV.m_fY,3);
+		ucHigh=0;
+		if(iIntegral>255){
+			ucHigh=((iIntegral>>4)&0xff);
+		}
+		ucLow=(iIntegral&0xff);
+		ucHighFrac=0;
+		if(iFrac>255){
+			ucHighFrac=((iFrac>>4)&0xff);
+		}
+		ucLowFrac=(iFrac&0xff);
+		p_xSS<<ucHigh<<ucLow<<ucHighFrac<<ucLowFrac;
+
+		return p_xSS;
+	}
+
+
+};
 
 
 #endif

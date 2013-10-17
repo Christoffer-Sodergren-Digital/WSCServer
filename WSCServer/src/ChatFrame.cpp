@@ -35,11 +35,11 @@ void ChatFrame::ParseFrame(unsigned char *p_pcData){
 	Finalize();
 }
 
-void ChatFrame::MakeFrame(unsigned char *p_pucData,ApplicationFrameOpCode p_eOpCode){
-	 CleanFrame();
+void ChatFrame::MakeFrame(unsigned char *p_pucData,int p_iSize,ApplicationFrameOpCode p_eOpCode){
+	CleanFrame();
 	unsigned char ucControlFlag=(m_bWhisper & 0x1);
 	
-    int iLen=strlen((const char *)p_pucData);
+    int iLen=p_iSize;
     if(iLen<2){return;}
    
 	m_ucOpCode=p_eOpCode;
@@ -48,18 +48,10 @@ void ChatFrame::MakeFrame(unsigned char *p_pucData,ApplicationFrameOpCode p_eOpC
 	m_pucData=new unsigned char[iDataSize];
     strcpy((char*)m_pucData,(const char*)p_pucData);
     m_uiDataSize=iDataSize;
-	
 
-	std::string sMsg=(const char*)(m_pucData);
-	/*int iTargetLen=0;
-	if(m_bWhisper){
-		iTargetLen=((ucControlFlag>>1) & 0xf);
-		m_sWhisperTarget=sMsg.substr(0,iTargetLen);
-		sMsg=sMsg.substr(iTargetLen);
-	}*/
-
+	std::string sMsg=(const char*)(m_pucData+1);
 	m_sMessage=sMsg;
-	
+	m_uiFrameSize=m_uiDataSize+m_uiDataOffset;
 
 	Finalize();
 }

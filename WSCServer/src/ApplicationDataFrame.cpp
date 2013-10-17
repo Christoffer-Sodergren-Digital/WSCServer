@@ -8,8 +8,8 @@ WSApplicationDataFrame::WSApplicationDataFrame(){
    CleanFrame();
 }
 
-WSApplicationDataFrame::WSApplicationDataFrame(unsigned char* p_pcData, ApplicationFrameOpCode p_eOpCode){
-    MakeFrame(p_pcData,p_eOpCode);
+WSApplicationDataFrame::WSApplicationDataFrame(unsigned char* p_pcData, int p_iLen, ApplicationFrameOpCode p_eOpCode){
+    MakeFrame(p_pcData,p_iLen,p_eOpCode);
 }
 
 WSApplicationDataFrame::~WSApplicationDataFrame(){
@@ -32,9 +32,9 @@ void WSApplicationDataFrame::CleanFrame(){
     m_pucFrame=0;
 }
 
-void WSApplicationDataFrame::MakeFrame(unsigned char* p_pcData, ApplicationFrameOpCode p_eOpCode){
+void WSApplicationDataFrame::MakeFrame(unsigned char* p_pcData, int p_iLen, ApplicationFrameOpCode p_eOpCode){
     CleanFrame();
-    int iLen=strlen((const char *)p_pcData);
+    int iLen=p_iLen;
    /* if(iLen<2){return;}*/
     m_ucOpCode=p_eOpCode;
 
@@ -43,10 +43,11 @@ void WSApplicationDataFrame::MakeFrame(unsigned char* p_pcData, ApplicationFrame
     memcpy(m_pucData,p_pcData,iLen);
     m_uiDataSize=iLen;
 	m_pucData[iLen]=0;
+	m_uiFrameSize=m_uiDataSize+m_uiDataOffset;
 }
 
 void WSApplicationDataFrame::Finalize(){
-    m_uiFrameSize=m_uiDataSize+m_uiDataOffset;
+   // m_uiFrameSize=m_uiDataSize+m_uiDataOffset;
     m_pucFrame=new unsigned char[m_uiDataSize+m_uiDataOffset+1];
     m_pucFrame[0]=m_ucOpCode;
     memcpy(m_pucFrame+m_uiDataOffset,m_pucData,m_uiDataSize);
@@ -55,9 +56,9 @@ void WSApplicationDataFrame::Finalize(){
     m_bValidFrame=true;
 }
 
-void WSApplicationDataFrame::ParseFrame(unsigned char* p_pcData){
+void WSApplicationDataFrame::ParseFrame(unsigned char* p_pcData,int p_iLen){
     CleanFrame();
-    int iLen=strlen((const char*)p_pcData);
+    int iLen=p_iLen;
     if(iLen<2){return;}
 
     m_ucOpCode=p_pcData[0];

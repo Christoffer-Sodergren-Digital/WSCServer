@@ -45,8 +45,8 @@ var Tile=function(p_Col,p_Row,p_Size,p_Wall,p_Layer,p_Atlas){
 	}
 	this.GetIsometricPosition();
 	
-	this.draw=function(){
-		var ctx=xThis.m_Ctx;
+	this.Draw=function(p_ctx){
+		var ctx=(p_ctx===undefined)?xThis.m_Ctx:p_ctx;
 		var step=xThis.m_Size;
 		var x=xThis.m_Col*step;
 		var y=xThis.m_Row*step;
@@ -199,6 +199,27 @@ var TileManager=function(p_Width,p_Height,p_StepSize){
 		var i,iC=xThis.m_Tiles.length;
 		for(i=0;i<iC;i++){
 			var t=xThis.m_Tiles[i];
+			var crd=t.GetIsometricPosition();
+			var x=crd[0];
+			var y=crd[1];
+			if(x>-s&&x<w+s){
+				if(y>-s&&y<h+s){
+					ret.push(t);
+				}
+			}
+		}
+		return ret;
+	}
+	this.GetTilesInViewPortOnLayer=function(p_Layer,p_Ret){
+		var w=xThis.m_CanvasW;
+		var h=xThis.m_CanvasH;
+		
+		var s=xThis.m_Step;
+		var ret=(p_Ret===undefined)?new Array():p_Ret;
+		var i,iC=xThis.m_Tiles.length;
+		for(i=0;i<iC;i++){
+			var t=xThis.m_Tiles[i];
+			if(t.m_Layer!==p_Layer){continue;}
 			var crd=t.GetIsometricPosition();
 			var x=crd[0];
 			var y=crd[1];

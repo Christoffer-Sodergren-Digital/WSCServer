@@ -51,8 +51,13 @@
 		</form>
 	</div>
 </div>
+<!--<canvas id="background" width="900" height="800" style="position:absolute;left:0;top:0;background-color:#000000;display:none;z-index:1;"></canvas>-->
 <canvas id="canvas" width="900" height="800" style="position:absolute;left:0;top:0;background-color:#000000;display:none;z-index:2;"></canvas>
+<canvas id="backbuffer" width="900" height="800" style="position:absolute;left:0;top:0;background-color:#000000;display:none;z-index:3;"></canvas>
 <canvas id="chat" width="450" height="150" style="position:absolute;left:0;top:650px;z-index:5;">
+<script src="js/Utils.js"></script>
+<script src="js/Player.js"></script>
+<script src="js/Entitymngr.js"></script>
 <script src="js/Keyboard.js"></script>
 <script src="js/Mouse.js"></script>
 <script src="js/Vec2d.js"></script>
