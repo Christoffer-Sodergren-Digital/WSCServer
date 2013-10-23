@@ -1,15 +1,34 @@
 var g_loggedin=false;
-
+var orgw=0;
+var orgh=0;
 document.getElementById("register-link").onclick=function(p_event){
 	var x=document.getElementById("reg-form");
 	x.style.display="block";
 }
 
+function getDocHeight() {
+    var D = document;
+    return Math.max(
+        D.body.scrollHeight, D.documentElement.scrollHeight,
+        D.body.offsetHeight, D.documentElement.offsetHeight,
+        D.body.clientHeight, D.documentElement.clientHeight
+    );
+}
+
 document.addEventListener('NetLoggedIn',function(e){
 	document.getElementById('login-box').style.display='none';
-	document.getElementById('canvas').style.display='block';
-	/* document.getElementById('background').style.display='block';
-	document.getElementById('foreground').style.display='block'; */
+	document.getElementById('fsib').style.display='block';
+	var canvas=document.getElementById('canvas');
+	canvas.style.display='block';
+	var w=document.body.clientWidth;
+	var h=getDocHeight();
+	h=(h>667)?667:h;
+	var cw=canvas.width;
+	canvas.style.left=((w-cw)/2)+'px';
+	canvas.height=h;
+	orgw=canvas.width;
+	orgh=canvas.height;
+	
 	init();
 	Keyboard.init();
 },false);
@@ -57,8 +76,9 @@ loginbtn.onclick=function(){
 
 function init(){
 	var canvas = document.getElementById("canvas");
-	/* var backbuffer=document.getElementById("backbuffer"); */
-	var tm=new TileManager(4000,4000,40);
+	var backbuffer=document.getElementById("backbuffer"); 
+	var foreground=document.getElementById("foreground");
+	var tm=TileManager;//new TileManager(4000,4000,40);
 	var target=null;
 	var anim=new Animation();
 	var xThis=this;
@@ -69,9 +89,10 @@ function init(){
 	var lastSnapshot=0;
 	var snapshots=[];
 	var lastupdate=1;
+	var lightsources=[];
 	
-	tm.LoadTileAtlas('images/atlas.png',function(){
-		tm.LoadFromBitmap('images/map0.png',function(data){
+	tm.LoadTileAtlas('images/tileset1.png',function(){
+		tm.LoadFromBitmap('images/lobby.png',function(data){
 			var ctx=canvas.getContext('2d');		
 			Mouse.RegisterEventListener('mousedown',function(event){
 				mousedown=true;
@@ -90,69 +111,112 @@ function init(){
 					anim.SetAnimation(anim.m_currentAnim-1);
 				}
 			});
-			anim.Load('images/idleanim2.png',function(){
 				var context=ctx;
-				/* var bb=backbuffer.getContext('2d'); */
 				var tempAxis=new Vec2d(10,0);
 				tm.SortLayers();
-				var arr=[];
-				arr.length=0;
-				tm.GetTilesInViewport(arr);
-				arr.sort(tm.SortFunc);
-				var bg=tm.GetTilesInViewPortOnLayer(0);
-				var fg=tm.GetTilesInViewPortOnLayer(2);
-				function update(p_Delta){
+				var tiles=tm.GetTiles();
+				var keyboardBuffer;  
+				var xEnts;
+				var tile;
+				var obj;
+				var o;
+				var InB4;
+				var dt;
+				var count=0;
+				var dx,dy,j,jC,dist,FTBDist,dn;
+				var update=function(p_Delta){
 					if(p_Delta-lastSnapshot>=100){
 						lastSnapshot=p_Delta;
-						var kb=Keyboard.GetKeyboardBuffer();
-						Keyboard.ClearBuffer();
-						if(kb.length>1){
-							SkyNet.Send(kb);
+						keyboardBuffer=Keyboard.GetKeyboardBuffer();
+						if(keyboardBuffer.length>1){
+							SkyNet.Send(keyboardBuffer);
 						}
+						Keyboard.ClearBuffer();
 					}
 					
-					var dt=p_Delta-lastupdate; //used for lerping
+					count=0;
+					dt=p_Delta-lastupdate; //used for lerping
 					lastupdate=p_Delta;
 					
 					EntityMngr.Update(dt);
 					Keyboard.UpdateKeyboardBuffer();
+					lightsources.length=0;
+					EntityMngr.GetEntitiesWithProperty('LightSource',lightsources);
 					
 					context.clearRect(0,0,canvas.width,canvas.height);
-					var i,iC=bg.length;
-					for(i=0;i<iC;i++){
-						bg[i].Draw(context);
-					}
-					var xEnts=EntityMngr.GetEntities();
-					for(var obj in xEnts){ //can't use regular for because of index disparity
-						var o=xEnts[obj];
+					xEnts=EntityMngr.GetEntities();
+					iC=tiles.length;
+					InB4=false;
+					 for(i=0;i<iC;i++){
+						tile=tiles[i];
+						j,jC=lightsources.length;
+						dx=((canvas.width/2)-TileManager.WorldOffsetX)-tile.m_x;
+						dy=((canvas.height/2)-TileManager.WorldOffsetY)-tile.m_y;
+						dist=Math.sqrt(dx*dx+dy*dy);
+						FTBDist=400;
+						for(j=0;j<jC;j++){
+							ls=lightsources[j];
+							dx=ls.m_x-tile.m_x;
+							dy=ls.m_y-tile.m_y;
+							dn=Math.sqrt(dx*dx+dy*dy);
+							if(dn<dist){
+								dist=dn;
+								FTBDist=ls.Radius();
+							}
+						}
+						if(dist>FTBDist){
+							context.globalAlpha=0;
+						}else{
+							context.globalAlpha=(1-(dist/FTBDist));
+						}
+
+						count+=(renderTile(tile))?1:0;
+					} 
+					context.globalAlpha=1;
+					
+					for(obj in xEnts){ //can't use regular for because of index disparity
+						o=xEnts[obj];
 						if(!o||o.Render===undefined){continue;}
 						o.Render(context);
 					}
-					iC=fg.length;
-					for(i=0;i<iC;i++){
-						fg[i].Draw(context);
-					}
+					Chat.Render();
 					
-					
-					//context.drawImage(backbuffer,0,0);
 					requestAnimationFrame(update);
 				}
 				update(0); 
-			});
 		});
 	}); 
 }
 
+var onfullscreenchange=function(e){
+	var canvas = document.getElementById("canvas");
+	if(document.webkitIsFullScreen){
+		canvas.style.left=0+'px';
+		canvas.style.top=0+'px';
+		canvas.width=document.width;
+		canvas.height=document.height-24; 
+	}else{	
+		var w=document.width;
+		var h=document.height;
+		var cw=orgw;
+		canvas.style.left=((w-cw)/2)+'px';
+		canvas.width=orgw;
+		canvas.height=orgh;
+	}
+}
+
 function goFullScreen(){
     var canvas = document.getElementById("canvas");
-    if(canvas.requestFullScreen)
-        canvas.requestFullScreen();
-    else if(canvas.webkitRequestFullScreen)
-        canvas.webkitRequestFullScreen();
-    else if(canvas.mozRequestFullScreen)
-        canvas.mozRequestFullScreen();
+	var chat=document.getElementById("chat");
+	
+	if(canvas.webkitRequestFullScreen){
+        canvas.webkitRequestFullScreen(Element.ALLOW_KEYBOARD_INPUT);
+		document.addEventListener('webkitfullscreenchange',onfullscreenchange);
+	}
 		
-	canvas.width=1024;
-	canvas.height=768;
+}
+
+function hidefsib(){
+	document.getElementById('fsib').style.display='none';
 }
 

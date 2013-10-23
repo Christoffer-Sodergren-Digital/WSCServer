@@ -1,7 +1,7 @@
-var WorldOffsetX=-220;
-var WorldOffsetY=550;
+
 
 var Tile=function(p_Col,p_Row,p_Size,p_Wall,p_Layer,p_Atlas){
+	this.m_Canvas=document.getElementById('canvas');
 	this.m_Ctx=document.getElementById('canvas').getContext('2d');
 	this.m_Col=p_Col;
 	this.m_Row=p_Row;
@@ -12,11 +12,11 @@ var Tile=function(p_Col,p_Row,p_Size,p_Wall,p_Layer,p_Atlas){
 	this.m_Layer=p_Layer;
 	this.m_Loaded=false;
 	this.m_Atlas=p_Atlas;
-	this.m_SpriteSize=[39,39];
+	this.m_SpriteSize=[p_Size,p_Size];
 	this.m_Ca=0;
 	this.m_Sa=0;
-	this.m_x=0;
-	this.m_y=0;
+	this.m_x=this.m_Col*p_Size;
+	this.m_y=this.m_Row*p_Size;
 	this.m_Selected=false;
 	
 	var xThis=this;
@@ -31,48 +31,15 @@ var Tile=function(p_Col,p_Row,p_Size,p_Wall,p_Layer,p_Atlas){
 		var step=xThis.m_Size;
 		var x=xThis.m_Col*step;
 		var y=xThis.m_Row*step;
-		x/=1.5;
-		y/=1.5;
-		var Ca=xThis.m_Ca;
-		var Sa=xThis.m_Sa;
-		var cx=x*Ca-y*Sa; 
-		var cy=y*Ca+x*Sa;
-		x=cx+WorldOffsetX;
-		y=cy+WorldOffsetY;
-		xThis.m_x=x;
-		xThis.m_y=y;
+
+		xThis.m_x=x+TileManager.WorldOffsetX;
+		xThis.m_y=y+TileManager.WorldOffsetY;
 		return [x,y];
 	}
-	this.GetIsometricPosition();
+	//this.GetIsometricPosition();
 	
 	this.Draw=function(p_ctx){
-		var ctx=(p_ctx===undefined)?xThis.m_Ctx:p_ctx;
-		var step=xThis.m_Size;
-		var x=xThis.m_Col*step;
-		var y=xThis.m_Row*step;
-		x/=1.5;
-		y/=1.5;
-		var Ca=xThis.m_Ca;
-		var Sa=xThis.m_Sa;
-		var cx=x*Ca-y*Sa; 
-		var cy=y*Ca+x*Sa;
-		x=cx+WorldOffsetX;
-		y=cy+WorldOffsetY;
-		xThis.m_x=x;
-		xThis.m_y=y;
-		ctx.drawImage(xThis.m_Atlas,
-			(xThis.m_AtlasX*step)+1,
-			(xThis.m_AtlasY*step)+1,
-			xThis.m_SpriteSize[0],
-			xThis.m_SpriteSize[1],
-			xThis.m_x,
-			xThis.m_y,
-			step,
-			step );
-		if(xThis.m_Selected){
-			ctx.fillStyle='#ff0000';
-			ctx.fillRect(xThis.m_x+step/2,xThis.m_y+step/2,10,10);
-		}
+		
 	}
 	this.Select=function(){
 		xThis.m_Selected=!xThis.m_Selected;
@@ -83,16 +50,41 @@ var Tile=function(p_Col,p_Row,p_Size,p_Wall,p_Layer,p_Atlas){
 	this.Row=function(){return xThis.m_Row;}
 	this.Col=function(){return xThis.m_Col;}
 }
+
+function renderTile(p_Tile){  // closures consume way to much memory, using regular function for rendering instead
+	//p_Tile.m_x= (((p_Tile.m_Col*p_Tile.m_Size)*0.65)*p_Tile.m_Ca-((p_Tile.m_Row*p_Tile.m_Size)*0.65)*p_Tile.m_Sa)+TileManager.WorldOffsetX; //this used to be readable, but javascript allocates memory for temp vars, so i had to compress it
+	//p_Tile.m_y= (((p_Tile.m_Row*p_Tile.m_Size)*0.65)*p_Tile.m_Ca+((p_Tile.m_Col*p_Tile.m_Size)*0.65)*p_Tile.m_Sa)+TileManager.WorldOffsetY;
+	
+	if(p_Tile.m_x+TileManager.WorldOffsetX>p_Tile.m_Canvas.width||p_Tile.m_x+TileManager.WorldOffsetX<-p_Tile.m_Size){return false;}
+	if(p_Tile.m_y+TileManager.WorldOffsetY>p_Tile.m_Canvas.height||p_Tile.m_y+TileManager.WorldOffsetY<-p_Tile.m_Size){return false;}
+	p_Tile.m_Ctx.drawImage(p_Tile.m_Atlas,
+		(p_Tile.m_AtlasX*p_Tile.m_Size),
+		(p_Tile.m_AtlasY*p_Tile.m_Size),
+		p_Tile.m_Size,
+		p_Tile.m_Size,
+		p_Tile.m_x+TileManager.WorldOffsetX,
+		p_Tile.m_y+TileManager.WorldOffsetY,
+		p_Tile.m_Size,
+		p_Tile.m_Size );  
+	if(p_Tile.m_Selected){
+		p_Tile.m_Ctx.fillStyle='#ff0000';
+		p_Tile.m_Ctx.fillRect(p_Tile.m_x+p_Tile.m_Size/2,p_Tile.m_y+p_Tile.m_Size/2,10,10);
+	}
+	return true;
+}
+
 var TileManager=function(p_Width,p_Height,p_StepSize){
 	this.m_Tiles=[];
 	this.m_MapWidth=(p_Width===undefined)?800:p_Width;
 	this.m_MapHeight=(p_Height===undefined)?800:p_Height;
-	this.m_Step=(p_StepSize===undefined)?40:p_StepSize;
+	this.m_Step=(p_StepSize===undefined)?80:p_StepSize;
 	this.m_TileAtlas=null;
 	this.m_Type='TileManager';
 	var canvas=document.getElementById('canvas');
 	this.m_CanvasW=canvas.width;
 	this.m_CanvasH=canvas.height;
+	this.WorldOffsetX=0;
+	this.WorldOffsetY=0;
 	
 	var xThis=this;
 	this.NewTile=function(p_Col,p_Row,p_Wall,p_Layer){
@@ -210,9 +202,11 @@ var TileManager=function(p_Width,p_Height,p_StepSize){
 		}
 		return ret;
 	}
-	this.GetTilesInViewPortOnLayer=function(p_Layer,p_Ret){
+	this.GetTilesInViewportOnLayer=function(p_Layer,p_Ret){
 		var w=xThis.m_CanvasW;
 		var h=xThis.m_CanvasH;
+		
+		p_Ret.length=0;
 		
 		var s=xThis.m_Step;
 		var ret=(p_Ret===undefined)?new Array():p_Ret;
@@ -276,33 +270,59 @@ var TileManager=function(p_Width,p_Height,p_StepSize){
 			var d=imgData.data;
 			context.fillStyle='#000000';
 			context.fillRect(0,0,mapWidth,mapHeight);
-			var colorKeys=[0,0xff0000,0x00ff00,0x0000ff,0xffff00,0xff00ff,0x00ffff,0xee0000];
-
+			//var colorKeys=[0,0xff0000/* ,0x00ff00,0x0000ff,0xffff00,0xff00ff,0x00ffff,0xee0000 */];
+			var layerFilter=[16];
+			var tilevariants=[[0,18],[1,1,1,1,16,17,17,17,17]];
 			var row=0,col=0;
 			var cnt=0;
 			var i,iC=d.length;
-			
-			 for(i=0;i<iC;i+=4){
+			var step=4;
+			var w=mapdata.width*4;
+			var h=mapdata.height*4;
+			for(i=0;i<iC;i+=step){
+				var r=parseInt((i)/w);
+				
+				var low=r*w;
+				var high=(r+1)*w;
 				var red=d[i];
-				var green=d[i+1];
-				var blue=d[i+2];
-				var alpha=d[i+3];
+				var wall=0;
 				
-				//firefox fix
 				if(red<2){red=0;}
-				if(green<2){green=0;}
-				if(blue<2){blue=0;}
-				//end fix
 				
-				var h = red;
-				h=(h<<8)|(green&0xff);
-				h=(h<<8)|(blue&0xff);
-				var wall=colorKeys.indexOf(h);
-
-				if(wall==4||wall==5){ //extra filling
-					xThis.NewTile(col,row,0,0);
+				if(red>0){
+					if(i-w>=0&&d[i-w]>10){
+						wall+=1;
+					}
+					if(i+step<high&&d[i+step]>10){
+						wall+=2;
+					}
+					if(i+w<w*h&&d[i+w]>10){
+						wall+=4;
+					}	
+					if(i-step>=low&&d[i-step]>10){
+						wall+=8;
+					}
+				}else{
+					var sp=i-w;
+					if(i-w>=0&&d[i-w]>10){
+						var idx=i-w;
+						var r1=Math.round((idx)/w);
+						var low1=r1*w;
+						var high1=(r1+1)*w;
+						if((idx+step<high1&&d[idx+step]>10)||(idx-step>=low1&&d[idx-step]>10)){
+							wall+=1;
+						}
+					}
 				}
-				xThis.NewTile(col,row,wall,(wall<3)?0:2);
+				
+				var variant=tilevariants[wall]
+				if(variant!=undefined){
+					if(tilevariants[wall].length>0){
+						var idx=Math.round(Math.random()*(tilevariants[wall].length-1));
+						wall=tilevariants[wall][idx];
+					}
+				}
+				xThis.NewTile(col,row,wall,(layerFilter.indexOf(wall)==-1)?0:2);
 				row=((cnt+1)%(mapWidth/tileS)==0&&cnt!=0)?row+1:row;
 				col=((cnt+1)%(mapHeight/tileS)==0&&cnt!=0)?0:col+1;
 				cnt++;
@@ -373,3 +393,4 @@ var TileManager=function(p_Width,p_Height,p_StepSize){
 		
 	}
 }
+window.TileManager=new TileManager(8000,8000,80);

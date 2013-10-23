@@ -3,6 +3,8 @@
 
 #include <list>
 #include <ctime>
+#include "Zone.h"
+
 
 class CagerChat;
 class Player;
@@ -24,6 +26,9 @@ class CagerInstance
 		CagerChat *Chat(){return m_pxChat;}
 		int Population()const{return (int)m_xPlayers.size();}
 
+		void PlayerDisconnect(Player *p_pxPlayer);
+		Cager::Zone *GetZone(){return m_pxZone;}
+
 		void Snapshot();
 		void Snapshot(Player *pxPlayer,bool p_bFull=true);
     protected:
@@ -33,6 +38,7 @@ class CagerInstance
 	clock_t m_iLastSnapshot;
 	CagerChat *m_pxChat;
     std::list<Player*> m_xPlayers;
+	Cager::Zone* m_pxZone;
 
 };
 

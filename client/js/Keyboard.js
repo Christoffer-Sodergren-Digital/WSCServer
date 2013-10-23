@@ -28,33 +28,31 @@ var Keyboard=function(){
 	}
 	this.init=function(){
 		document.onkeydown=function(event){
-		xThis.m_Key[event.which]=true;
-		var i,iC=xThis.m_EventListeners.length;
-		for(i=0;i<iC;i++){
-			if(xThis.m_EventListeners[i].type=='keydown'){
-				xThis.m_EventListeners[i].callback(event);
+			xThis.m_Key[event.which]=true;
+			var i,iC=xThis.m_EventListeners.length;
+			for(i=0;i<iC;i++){
+				if(xThis.m_EventListeners[i].type=='keydown'){
+					xThis.m_EventListeners[i].callback(event);
+				}
 			}
-		}
-		 var vk=0;
-		var tmp=xThis.m_BufferFilter;
-		var w=event.which;
-		var i,iC=tmp.length;
-		var preventDefault=false;
-		for(i=iC;i--;){
-			var o=tmp[i];
-			if(o.k==w){
-				vk=o.vk;
-				preventDefault=true;
-				break;
+			var vk=0;
+			var tmp=xThis.m_BufferFilter;
+			var w=event.which;
+			var i,iC=tmp.length;
+			var preventDefault=false;
+			for(i=iC;i--;){
+				var o=tmp[i];
+				if(o.k==w){
+					vk=o.vk;
+					preventDefault=true;
+					break;
+				}
+			} 
+			
+			if(event.which==8||preventDefault){ //prevent backspace navigation
+				event.preventDefault();
+				return false;
 			}
-		} 
-		/* if(vk!=0){
-			xThis.m_KeyboardBuffer.push(vk);
-		} */
-		if(event.which==8||preventDefault){ //prevent backspace navigation
-			event.preventDefault();
-			return false;
-		}
 		
 		}
 		document.onkeyup=function(event){
@@ -67,6 +65,7 @@ var Keyboard=function(){
 			}
 		}
 		document.onkeypress=function(event){
+			l(event);
 			var i,iC=xThis.m_EventListeners.length;
 			for(i=0;i<iC;i++){
 				if(xThis.m_EventListeners[i].type=='keypress'){
@@ -82,7 +81,9 @@ var Keyboard=function(){
 		return xThis.m_KeyboardBuffer;
 	}
 	this.ClearBuffer=function(){
-		xThis.m_KeyboardBuffer=[4];
+		xThis.m_KeyboardBuffer.length=0;
+		xThis.m_KeyboardBuffer.push(4);
+		//xThis.m_KeyboardBuffer=[4];
 	}
 }
 

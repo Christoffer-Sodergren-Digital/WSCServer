@@ -38,6 +38,8 @@ class Player : public BaseEntity{
 		friend std::ostream & operator<<(std::ostream & p_xSS,Player & p_xP);
 		std::string & Name(){return m_sName;}
 
+		void Player::DisconnectData(std::ostream & p_xSS);
+
 		virtual void PreDisconnect();
 	protected:
 	private:

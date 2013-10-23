@@ -3,7 +3,7 @@
 
 #define ENT_BASE 0
 #define ENT_PLAYER 1
-
+#define ENT_TORCH 2
 
 
 #endif

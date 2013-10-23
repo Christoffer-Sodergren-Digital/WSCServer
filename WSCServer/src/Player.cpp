@@ -10,6 +10,7 @@
 #include "CagerChat.h"
 #include "MySQLDB.h"
 #include "EntityID.h"
+#include "Zone.h"
 
 
 using namespace WS;
@@ -61,8 +62,8 @@ void Player::Update(){
 		}
     }
     if(pxCon->HasHalfClose()){
-        std::cout<<"Connection closed: ";
-        pxCon->GetRemoteAddr().Dump();
+        /*std::cout<<"Connection closed: ";
+        pxCon->GetRemoteAddr().Dump();*/
 		m_pxConnection->SetShutdown();
     }
 }
@@ -94,20 +95,27 @@ void Player::ParseInputBuffer(unsigned char *p_pucData,int p_iLen){
 	size_t iLen=p_iLen;
 	bool bC=true;
 	int i,iC=(int)iLen;
+	AABB xTmp=m_xAABB;
 	for(i=1;i<iC;i++){
 		unsigned char ucK=p_pucData[i]-48;
 		if(ucK==DOWN){
-			m_vPos.m_fY+=2;
+			xTmp.m_vOrg.m_fY+=2;
 		}else if(ucK==LEFT){
-			m_vPos.m_fX-=2;
+			xTmp.m_vOrg.m_fX-=2;
 		}else if(ucK==UP){
-			m_vPos.m_fY-=2;
+			xTmp.m_vOrg.m_fY-=2;
 		}else if(ucK==RIGHT){
-			m_vPos.m_fX+=2;
+			xTmp.m_vOrg.m_fX+=2;
 		}else{
 			bC=false;
 		}
 	}
+	
+	Cager::Zone *pxZone=m_pxInstance->GetZone();
+	if(!pxZone->Collision(&xTmp)){
+		m_xAABB=xTmp;
+	}
+
 	m_bNetChanged=bC;
 }
 
@@ -156,21 +164,16 @@ void Player::AttemptLogin(unsigned char *p_pucData){
 	delete pxPS;
 	delete pxRS;
 	
-	pxDB->Reconnect();
-	pxCon=pxDB->GetConnection();
+	unsigned char *pucReturn=new unsigned char[7];
+	strcpy((char*)pucReturn,"ok");
+	pucReturn[2]=(m_iEntityID>>24)&0xff;
+	pucReturn[3]=(m_iEntityID>>16)&0xff;
+	pucReturn[4]=(m_iEntityID>>8)&0xff;
+	pucReturn[5]=m_iEntityID&0xff;
+	pucReturn[6]=0;
 
-	sql::Statement *pxST=NULL;
-	try{
-		pxST=pxCon->createStatement();
-		pxST->execute("UPDATE ca_character SET zone=0 WHERE id=1");
-	}catch (SQLException & e){
-		std::cerr<<e.what()<<std::endl;
-	}
 
-	delete pxST;
-
-	WS::WSApplicationDataFrame *pxAppFrame=new WS::WSApplicationDataFrame((unsigned char*)"ok",2,WS::APP_LOGIN);
-	//pxAppFrame->Finalize();
+	WS::WSApplicationDataFrame *pxAppFrame=new WS::WSApplicationDataFrame(pucReturn,7,WS::APP_LOGIN);
 	WS::WSFrame *pxWSFrame=new WS::WSFrame(pxAppFrame->Frame(),pxAppFrame->FrameSize(),WS::OP_BINARY);
 	m_pxConnection->Send(pxWSFrame->Data(),pxWSFrame->FrameSize());
 
@@ -230,11 +233,19 @@ void Player::PreDisconnect(){
 	}
 }
 
+void Player::DisconnectData(std::ostream & p_xSS){
+	unsigned char ucHigh=0;
+	if(m_iEntityID>255){
+		ucHigh=((m_iEntityID>>8)&0xff);
+	}
+	unsigned char ucLow=(m_iEntityID&0xff);
+	p_xSS<<ucHigh<<ucLow;
+}
 
 std::ostream & operator<<(std::ostream & p_xSS, Player & p_xP){
 	p_xSS<<p_xP.m_ucEntityType;
 	BaseEntity & xBase(p_xP);
 	p_xSS<<xBase;
-	p_xSS<<p_xP.m_vPos;
+	p_xSS<<p_xP.m_xAABB.m_vOrg;
 	return p_xSS;
 }

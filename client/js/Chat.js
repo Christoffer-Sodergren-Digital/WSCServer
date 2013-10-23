@@ -1,5 +1,5 @@
 var Chat=function(){
-	this.m_Canvas=document.getElementById('chat');
+	this.m_Canvas=document.getElementById('canvas');
 	this.m_Ctx=this.m_Canvas.getContext('2d');
 	this.m_Messages=[];
 	this.m_Alpha=0;
@@ -11,7 +11,7 @@ var Chat=function(){
 	
 	Keyboard.RegisterEventListener('keypress', function(p_event){
 		var w=p_event.which;
-		
+		l(w);
 		if(w==13){ //return
 			if(xThis.m_ChatVisible){
 				if(xThis.m_CurrentString.length>0){
@@ -19,16 +19,15 @@ var Chat=function(){
 					SkyNet.Send(data);
 					xThis.m_CurrentString="";
 					xThis.m_ChatVisible=false;
-					xThis.fadeOut();
 				}else{
 					xThis.m_ChatVisible=false;
-					xThis.fadeOut();
 				}
 			}else{
 				xThis.m_ChatVisible=true;
 				xThis.m_CurrentString=">";
 				xThis.m_Alpha=1;
 			}
+			p_event.preventDefault();
 		}else{
 			if(xThis.m_ChatVisible){
 				if(w==8){return;} //firefox fix
@@ -61,35 +60,27 @@ var Chat=function(){
 		if(xThis.m_Messages.length>50){
 			xThis.m_Messages.splice(0,1);
 		}
-		
-		if(xThis.m_Alpha<=0){
-			requestAnimationFrame(xThis.fadeOut);
-		}
 		xThis.m_Alpha=1;
 	}
 	
 	this.fadeOut=function(){
 		if(xThis.m_ChatVisible==false){
 			xThis.m_Alpha-=0.002;
-			if(xThis.m_Alpha<=0){
-				xThis.m_AnimationID=0;
-			}
-		}
-		if(xThis.m_Alpha>0){
-			if(xThis.m_AnimationID!=0){
-				cancelAnimationFrame(xThis.m_AnimationID);
-			}
-			xThis.m_AnimationID=requestAnimationFrame(xThis.fadeOut);
 		}
 	}
 	
-	this.render=function(){
-		if(xThis.m_Alpha<=0&&xThis.m_ChatVisible==false){
-			requestAnimationFrame(xThis.render);
-			return;
-		}
+	this.Render=function(){
 		
+		if(xThis.m_Alpha<0.01){xThis.m_Alpha=0;}
+		if(xThis.m_Alpha<=0&&xThis.m_ChatVisible==false){
+			return;
+		} 
+		
+		if(xThis.m_ChatVisible==false){
+			xThis.fadeOut();
+		}
 		var ctx=xThis.m_Ctx;
+	//	ctx.clearRect(0,0,xThis.m_Canvas.width,xThis.m_Canvas.height);
 		var w=xThis.m_Canvas.width;
 		var h=xThis.m_Canvas.height-(xThis.m_LineHeight*2);
 		var x=2,y=h-xThis.m_LineHeight;
@@ -97,8 +88,6 @@ var Chat=function(){
 		ctx.font="16px Arial";
 		
 		ctx.globalAlpha=xThis.m_Alpha;
-		ctx.clearRect(0,0,xThis.m_Canvas.width,xThis.m_Canvas.height);
-		
 		if(xThis.m_ChatVisible){
 			ctx.fillStyle="#FF1505";
 			ctx.fillText(xThis.m_CurrentString,2,xThis.m_Canvas.height-xThis.m_LineHeight);
@@ -128,11 +117,8 @@ var Chat=function(){
 			x=2;
 		}
 		ctx.globalAlpha=1;
-		requestAnimationFrame(xThis.render);
 	}
-	
-	requestAnimationFrame(this.render);
-	
+
 	document.addEventListener('NetMessage',this.OnMessage,false);
 }
 
