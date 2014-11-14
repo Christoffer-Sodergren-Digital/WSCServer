@@ -42,12 +42,10 @@ class Player : public BaseEntity{
 		friend std::ostream & operator<<(std::ostream & p_xSS,Player & p_xP);
 		std::string & Name(){return m_sName;}
 
-<<<<<<< HEAD:WSCServer/include/game/Player.h
+
 		void Player::DisconnectData(std::ostream & p_xSS);
 
 		virtual std::ostream & Serialize(std::ostream & p_xO, bool p_bFull);
-=======
->>>>>>> parent of fa8c75e... Entities, collisions and movement:WSCServer/include/Player.h
 		virtual void PreDisconnect();
 	protected:
 	private:

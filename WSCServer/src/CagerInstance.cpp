@@ -54,12 +54,9 @@ void CagerInstance::Snapshot(Player *p_pxPlayer, bool p_bFull){
 	std::list<Player*>::iterator it;
 	for(it=m_xPlayers.begin();it!=m_xPlayers.end();++it){
 		Player *pxPlayer=(*it);
-<<<<<<< HEAD
 		if(!pxPlayer->IsLoggedIn()){continue;}
 		pxPlayer->Serialize(xSS, true);
-=======
 		xSS<<(*pxPlayer);
->>>>>>> parent of fa8c75e... Entities, collisions and movement
 	}
 	int iBuffLen=xSS.str().length();
 	if(iBuffLen<=0){return;}
@@ -86,11 +83,7 @@ void CagerInstance::Snapshot(){
 		if(!pxPlayer->IsLoggedIn()){continue;}
 		if(pxPlayer->NetChanged()){
 			xSS<<(*pxPlayer);
-<<<<<<< HEAD
-=======
-
 			pxPlayer->NetClear();
->>>>>>> parent of fa8c75e... Entities, collisions and movement
 		}
 	}
 	int iBuffLen=xSS.str().length();

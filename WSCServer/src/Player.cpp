@@ -11,12 +11,7 @@
 #include "CagerChat.h"
 #include "MySQLDB.h"
 #include "EntityID.h"
-<<<<<<< HEAD
 #include "Zone.h"
-#include "Item.h"
-=======
-
->>>>>>> parent of fa8c75e... Entities, collisions and movement
 
 using namespace WS;
 

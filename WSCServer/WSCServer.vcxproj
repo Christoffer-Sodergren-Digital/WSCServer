@@ -106,7 +106,7 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_CRT_SECURE_NO_WARNINGS;_DEBUG;_CONSOLE;CPPCONN_PUBLIC_FUNC=;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>C:\Users\Christoffer\Dev\mysql-connector-c++-noinstall-1.1.3-winx64\include\cppconn;C:\Users\Christoffer\Dev\mysql-connector-c++-noinstall-1.1.3-winx64\include;C:\boost_1_54_0;C:\Users\Christoffer\Dev\C++\WSCServer\WSCServer\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\Christoffer\Dev\mysql-connector-c++-noinstall-1.1.3-winx64\include\cppconn;C:\Users\Christoffer\Dev\mysql-connector-c++-noinstall-1.1.3-winx64\include;C:\boost_1_54_0;C:\Users\Christoffer\Dev\C++\WSCServer\WSCServer\include;C:\Users\Christoffer\Dev\C++\WSCServer\WSCServer\include\hl;C:\Users\Christoffer\Dev\C++\WSCServer\WSCServer\include\game;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <InlineFunctionExpansion>Disabled</InlineFunctionExpansion>
       <RuntimeTypeInfo>true</RuntimeTypeInfo>
@@ -186,11 +186,8 @@
     <ClCompile Include="src\hl_sha512wrapper.cpp" />
     <ClCompile Include="src\hl_wrapperfactory.cpp" />
     <ClCompile Include="src\IPAddr4.cpp" />
-<<<<<<< HEAD
     <ClCompile Include="src\Item.cpp" />
     <ClCompile Include="src\lodepng.cpp" />
-=======
->>>>>>> parent of fa8c75e... Entities, collisions and movement
     <ClCompile Include="src\MySQLDB.cpp" />
     <ClCompile Include="src\Player.cpp" />
     <ClCompile Include="src\ResourceManager.cpp" />
@@ -210,15 +207,12 @@
     <ClInclude Include="include\ChatFrame.h" />
     <ClInclude Include="include\EntityID.h" />
     <ClInclude Include="include\FrameManager.h" />
-<<<<<<< HEAD
     <ClInclude Include="include\game\BSPTree.h" />
     <ClInclude Include="include\game\CagerMap.h" />
     <ClInclude Include="include\game\Item.h" />
     <ClInclude Include="include\game\Player.h" />
     <ClInclude Include="include\game\Vec2.h" />
     <ClInclude Include="include\game\Zone.h" />
-=======
->>>>>>> parent of fa8c75e... Entities, collisions and movement
     <ClInclude Include="include\hashlibpp.h" />
     <ClInclude Include="include\HiResTimer.h" />
     <ClInclude Include="include\hl_exception.h" />
@@ -237,11 +231,8 @@
     <ClInclude Include="include\hl_wrapperfactory.h" />
     <ClInclude Include="include\IPAddr4.h" />
     <ClInclude Include="include\MySQLDB.h" />
-<<<<<<< HEAD
     <ClInclude Include="include\PerlinNoise.h" />
-=======
     <ClInclude Include="include\Player.h" />
->>>>>>> parent of fa8c75e... Entities, collisions and movement
     <ClInclude Include="include\ResourceManager.h" />
     <ClInclude Include="include\SnapshotFrame.h" />
     <ClInclude Include="include\StringHelper.h" />
