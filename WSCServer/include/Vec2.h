@@ -60,32 +60,31 @@ public:
 	float m_fY;
 
 	friend std::ostream & operator<<(std::ostream & p_xSS,Vec2 & p_vV){
-		unsigned char ucSign=(p_vV.m_fX>=0)?0:1;
-		int iIntegral=(int)abs(p_vV.m_fX);
+		int iIntegral=(int)p_vV.m_fX;
 		int iFrac=p_vV.frac_to_int(p_vV.m_fX,3);
-		unsigned char ucHigh=(ucSign)?0x80:0;
+		unsigned char ucHigh=0;
 		if(iIntegral>255){
-			ucHigh=ucHigh|((iIntegral>>8)&0xff);
+			ucHigh=((iIntegral>>4)&0xff);
 		}
 		unsigned char ucLow=(iIntegral&0xff);
+
 		unsigned char ucHighFrac=0;
 		if(iFrac>255){
-			ucHighFrac=((iFrac>>8)&0xff);
+			ucHighFrac=((iFrac>>4)&0xff);
 		}
 		unsigned char ucLowFrac=(iFrac&0xff);
 		p_xSS<<ucHigh<<ucLow<<ucHighFrac<<ucLowFrac;
 
-		ucSign=(p_vV.m_fY>=0)?0:1;
-		iIntegral=abs(p_vV.m_fY);
+		iIntegral=(int)p_vV.m_fY;
 		iFrac=p_vV.frac_to_int(p_vV.m_fY,3);
-		ucHigh=(ucSign)?0x80:0;;
+		ucHigh=0;
 		if(iIntegral>255){
-			ucHigh=ucHigh|((iIntegral>>8)&0xff);
+			ucHigh=((iIntegral>>4)&0xff);
 		}
 		ucLow=(iIntegral&0xff);
 		ucHighFrac=0;
 		if(iFrac>255){
-			ucHighFrac=((iFrac>>8)&0xff);
+			ucHighFrac=((iFrac>>4)&0xff);
 		}
 		ucLowFrac=(iFrac&0xff);
 		p_xSS<<ucHigh<<ucLow<<ucHighFrac<<ucLowFrac;
