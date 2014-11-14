@@ -58,7 +58,7 @@ class CagerMap
 {
 public:
 	CagerMap(unsigned int p_uiSeed=0);
-	~CagerMap(void);
+	~CagerMap(void); 
 
 	void Seed(unsigned int p_uiSeed){m_uiSeed=p_uiSeed;}
 

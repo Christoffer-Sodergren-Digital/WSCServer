@@ -1,5 +1,5 @@
 #Zone description file for Lobby
 spawnx=2560
-spawny=1360
+spawny=1290
 map=zones/lobby.png
-entities=2 Torch 2640 1200 1 Torch 2880 1840 1
+entities=2 Torch 2560 1200 1 Torch 0 0 1

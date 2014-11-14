@@ -41,7 +41,7 @@ std::ostream & operator<<(std::ostream & p_xSS,Torch & p_xT){
 	p_xSS<<p_xT.m_ucEntityType;
 	BaseEntity & xBase(p_xT);
 	p_xSS<<xBase;
-	p_xSS<<ucState;
 	p_xSS<<p_xT.m_xAABB.m_vOrg;
+	p_xSS<<ucState;
 	return p_xSS;
 }

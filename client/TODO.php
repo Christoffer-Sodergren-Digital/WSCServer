@@ -4,10 +4,8 @@ Dimensional binocular   entity in town that when used allows the user to view th
 TODO list:
 
 Server							
-Map generation					
-Movement and collisions			
+	
 
 Client
-Animations
 UI
 Inventory

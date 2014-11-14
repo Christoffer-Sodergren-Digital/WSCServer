@@ -27,7 +27,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v110</PlatformToolset>
+    <PlatformToolset>v120</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
@@ -106,7 +106,7 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_CRT_SECURE_NO_WARNINGS;_DEBUG;_CONSOLE;CPPCONN_PUBLIC_FUNC=;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>C:\Users\Christoffer\Dev\C++\WSCServer\WSCServer\include\game;C:\Users\Christoffer\Dev\C++\WSCServer\WSCServer\include\hl;C:\Users\Christoffer\Dev\mysql-connector-c++-noinstall-1.1.3-winx64\include\cppconn;C:\Users\Christoffer\Dev\mysql-connector-c++-noinstall-1.1.3-winx64\include;C:\boost_1_54_0;C:\Users\Christoffer\Dev\C++\WSCServer\WSCServer\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\Christoffer\Dev\mysql-connector-c++-noinstall-1.1.3-winx64\include\cppconn;C:\Users\Christoffer\Dev\mysql-connector-c++-noinstall-1.1.3-winx64\include;C:\boost_1_54_0;C:\Users\Christoffer\Dev\C++\WSCServer\WSCServer\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <InlineFunctionExpansion>Disabled</InlineFunctionExpansion>
       <RuntimeTypeInfo>true</RuntimeTypeInfo>
@@ -168,15 +168,12 @@
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="BSPTree.cpp" />
-    <ClCompile Include="CagerMap.cpp" />
     <ClCompile Include="src\ApplicationDataFrame.cpp" />
     <ClCompile Include="src\BaseEntity.cpp" />
     <ClCompile Include="src\CagerChat.cpp" />
     <ClCompile Include="src\CagerInstance.cpp" />
     <ClCompile Include="src\CagerWorld.cpp" />
     <ClCompile Include="src\ChatFrame.cpp" />
-    <ClCompile Include="src\EntityFactory.cpp" />
     <ClCompile Include="src\HiResTimer.cpp" />
     <ClCompile Include="src\hl_md5.cpp" />
     <ClCompile Include="src\hl_md5wrapper.cpp" />
@@ -189,17 +186,18 @@
     <ClCompile Include="src\hl_sha512wrapper.cpp" />
     <ClCompile Include="src\hl_wrapperfactory.cpp" />
     <ClCompile Include="src\IPAddr4.cpp" />
+<<<<<<< HEAD
+    <ClCompile Include="src\Item.cpp" />
     <ClCompile Include="src\lodepng.cpp" />
+=======
+>>>>>>> parent of fa8c75e... Entities, collisions and movement
     <ClCompile Include="src\MySQLDB.cpp" />
-    <ClCompile Include="src\PerlinNoise.cpp" />
     <ClCompile Include="src\Player.cpp" />
     <ClCompile Include="src\ResourceManager.cpp" />
     <ClCompile Include="src\SnapshotFrame.cpp" />
     <ClCompile Include="src\TCPSocket.cpp" />
-    <ClCompile Include="src\Torch.cpp" />
     <ClCompile Include="src\WSConnection.cpp" />
     <ClCompile Include="src\WSFrame.cpp" />
-    <ClCompile Include="src\Zone.cpp" />
     <ClCompile Include="WSCServer.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -210,13 +208,17 @@
     <ClInclude Include="include\CagerInstance.h" />
     <ClInclude Include="include\CagerWorld.h" />
     <ClInclude Include="include\ChatFrame.h" />
-    <ClInclude Include="include\EntityFactory.h" />
     <ClInclude Include="include\EntityID.h" />
     <ClInclude Include="include\FrameManager.h" />
+<<<<<<< HEAD
     <ClInclude Include="include\game\BSPTree.h" />
     <ClInclude Include="include\game\CagerMap.h" />
+    <ClInclude Include="include\game\Item.h" />
+    <ClInclude Include="include\game\Player.h" />
     <ClInclude Include="include\game\Vec2.h" />
     <ClInclude Include="include\game\Zone.h" />
+=======
+>>>>>>> parent of fa8c75e... Entities, collisions and movement
     <ClInclude Include="include\hashlibpp.h" />
     <ClInclude Include="include\HiResTimer.h" />
     <ClInclude Include="include\hl_exception.h" />
@@ -234,15 +236,17 @@
     <ClInclude Include="include\hl_types.h" />
     <ClInclude Include="include\hl_wrapperfactory.h" />
     <ClInclude Include="include\IPAddr4.h" />
-    <ClInclude Include="include\lodepng.h" />
     <ClInclude Include="include\MySQLDB.h" />
+<<<<<<< HEAD
     <ClInclude Include="include\PerlinNoise.h" />
+=======
     <ClInclude Include="include\Player.h" />
+>>>>>>> parent of fa8c75e... Entities, collisions and movement
     <ClInclude Include="include\ResourceManager.h" />
     <ClInclude Include="include\SnapshotFrame.h" />
     <ClInclude Include="include\StringHelper.h" />
     <ClInclude Include="include\TCPSocket.h" />
-    <ClInclude Include="include\Torch.h" />
+    <ClInclude Include="include\Vec2.h" />
     <ClInclude Include="include\Vec3.h" />
     <ClInclude Include="include\WSConnection.h" />
     <ClInclude Include="include\WSFrame.h" />
